@@ -1,0 +1,17 @@
+﻿------------------------------------------------------------
+□Directory Deploy
+------------------------------------------------------------
+./
+├ src/            … chrome extension program source Directory.
+│  ├ images/      … image Directory.
+│  ├ js/          … JavaScript files.
+│  └ manifest.json… chrome extension manifest file.
+│
+├ test/            … unit test Directory.
+│  ├ unittest_server … python unittest_server.py
+│  ├ index.html   … 
+│  └ case1.html   … unit case 1.
+│
+├ memo.txt        … It is a file that is open now.
+├ LICENSE         … MIT license file.
+└ README.md       … github document root.
