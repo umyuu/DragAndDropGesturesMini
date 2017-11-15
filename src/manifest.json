@@ -1,0 +1,21 @@
+{
+    "manifest_version": 2,
+	"author": "うみゅ",
+	"description": "DragAndDrop Gestures mini",
+    "name": "DragAndDrop Gestures mini",
+    "short_name": "D&D Gestures",
+    "browser_action": {
+        "default_icon": "./image/icon.png",
+        "default_title": "DragAndDrop Gestures mini"
+    },
+	"permissions": [
+        "downloads"
+	],
+	"content_scripts": [{
+		"matches": [ "http://*/*", "https://*/*" ],
+		"js": [ "js/gestures.js" ],
+		"run_at": "document_end"
+	}],
+	"homepage_url": "https://github.com/umyuu/MouseGestures/",
+	"version": "1.0.2"
+}
