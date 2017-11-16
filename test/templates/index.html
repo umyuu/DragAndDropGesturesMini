@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>{{ title }}</title>
+<meta name="creation date" content="{{ escape(creation_date) }}">
+</head>
+<body>
+作成日時：{{ escape(creation_date) }}<br>
+    <ul>
+      {% for item in items %}
+        <li><a href="{{ escape(item) }}" target="_top">{{ escape(item) }}</a></li>
+      {% end %}
+    </ul>
+</body>
+</html>
