@@ -8,8 +8,10 @@
 │  └ manifest.json… chrome extension manifest file.
 │
 ├ test/            … unit test Directory.
-│  ├ unittest_server … python unittest_server.py
-│  ├ index.html   … 
+│  ├ templates     … tornado template files.
+│  │  └ index.html  
+│  ├ unittest_server.py … python unittest_server.py
+│  ├ index.bat    … 
 │  └ case1.html   … unit case 1.
 │
 ├ memo.txt        … It is a file that is open now.
