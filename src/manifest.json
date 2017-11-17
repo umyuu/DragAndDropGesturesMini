@@ -17,5 +17,8 @@
 		"run_at": "document_start"
 	}],
 	"homepage_url": "https://github.com/umyuu/DragAndDropGesturesMini/",
+    "web_accessible_resources":[
+        "resources/setting.json"
+    ],
 	"version": "1.0.4"
 }
