@@ -6,8 +6,10 @@
     "short_name": "D&D Gestures",
     "browser_action": {
         "default_icon": "./image/icon.png",
-        "default_title": "DragAndDrop Gestures Mini"
+        "default_title": "DragAndDrop Gestures Mini",
+        "default_popup": "./popup/popup.html"
     },
+    "options_page": "./popup/popup.html",
 	"permissions": [
         "activeTab", "downloads"
 	],
