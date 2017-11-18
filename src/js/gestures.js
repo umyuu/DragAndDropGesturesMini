@@ -53,7 +53,7 @@
             // 設定ファイル情報を取得
             let param = MessageFactory.create('load', 
                                               {url: chrome.extension.getURL('resources/setting.json')});
-            chrome.runtime.sendMessage(param, response => { this.onDebugLog(response); });
+            chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
             this.assignEventHandlers();
         }
         assignEventHandlers(){
@@ -88,7 +88,7 @@
             const link = new DownloadLink(src_attr, this.Setting);
             const param = MessageFactory.create('onDownload', {url: link.href, filename: link.download});
             // ダウンロードメッセージを発火
-            chrome.runtime.sendMessage(param, response => { this.onDebugLog(response); });
+            chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
         }
     }
     window.ext_mg = new MouseGestures(true);
