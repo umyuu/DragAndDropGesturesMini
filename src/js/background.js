@@ -27,6 +27,10 @@
             });
         }
     }
+    const STATUS = {
+        OK: 200,
+        NG: 400,
+    };
     class Background {
         constructor() {
             this.creation_date = new Date();
@@ -40,30 +44,30 @@
                     // async
                     Resources.fetch(request.url).then(res => {
                         this.data = JSON.parse(res);
-                        let param = this.getResponseResult(request, "OK");
+                        let param = this.getResponseResult(request, STATUS.OK);
                         param = Object.assign(param, {data: this.data});
                         chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
                             chrome.tabs.sendMessage(tabs[0].id, param, () => {});
                         });
                     }).catch(e => {
                         console.error(e);
-                        let param = this.getResponseResult(request, "NG");
+                        let param = this.getResponseResult(request, STATUS.NG);
                         param = Object.assign(param, {data: undefined});
                         chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
                             chrome.tabs.sendMessage(tabs[0].id, param, () => {});
                         });
                     });
-                    sendResponse(this.getResponseResult(request, "OK"));
+                    sendResponse(this.getResponseResult(request, STATUS.OK));
                     return;
                 }
                 if(request.type === 'onDownload'){
                     chrome.downloads.download({
                         url: request.url, filename: request.filename
                     });
-                    sendResponse(this.getResponseResult(request, "OK"));
+                    sendResponse(this.getResponseResult(request, STATUS.OK));
                     return;
                 }
-                sendResponse(this.getResponseResult(request, "OK"));
+                sendResponse(this.getResponseResult(request, STATUS.OK));
                 return;
 	       });
         }
