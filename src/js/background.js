@@ -76,6 +76,9 @@
                     message.send({payload: res});
                 }).catch(ex => {
                     console.error(ex);
+                    let message = new Message(request.type, STATUS.NG);
+                    message.dst = sender.tab.id;
+                    message.send({payload: chrome.runtime.lastError});
                 });
                 let response = new Message(request.type);
                 sendResponse(Object.assign(response.toData(), {request:request}));

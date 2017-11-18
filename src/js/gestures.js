@@ -39,22 +39,21 @@
         }
     }
     class MouseGestures {
-        constructor(isDebug = false) {
-            this.isDebug = isDebug;
+        constructor() {
             this.Setting = undefined;
             this.func = {};
             this.assignEventHandlers();
         }
         assignEventHandlers(){
             this.func['load'] = (request, sender, sendResponse) => {
-                this.onDebugLog(request);
+                Log.d('net', request);
                 // 設定
                 this.Setting = request.payload;
                 let param = MessageFactory.create(request.type);
                 sendResponse(param);
             };
             this.func['onDownload'] = (request, sender, sendResponse) => {
-                this.onDebugLog(request);
+                Log.d('net', request);
                 let param = MessageFactory.create(request.type);
                 sendResponse(param);
             };
@@ -69,54 +68,51 @@
             // 設定ファイル情報を取得
             let param = MessageFactory.create('load', 
                                               {url: chrome.extension.getURL('resources/setting.json')});
-            chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
-        }
-        parseLink(target, links) {
-            let src_attr = target.src || target.href;
-            if (src_attr === undefined) {
-                return;
-            }
-            const link = new DownloadLink(src_attr, this.Setting);
-            // IMGタグとAタグでhrefが同じならば１回だけダウンロード。
-            links.set(link.href, link.download);
+            
+            chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
         }
         async ondragend(e) {
+            //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
             if(this.Setting === undefined) {
                 return;
             }
-            let links = new Map();
+            console.assert(target != undefined);
+            let linkMap = new Map(); // <url, filename>
             // ダウンロード1回目
-            this.parseLink(target, links);
+            this.parseLink(target, linkMap);
             // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
             if(target.parentElement.tagName.toUpperCase() === 'A'){
-                this.parseLink(target.parentElement, links);
+                this.parseLink(target.parentElement, linkMap);
             }
             
-            this.onDownload(links);
+            this.onDownload(linkMap);
             //var ed = window.performance.now() - st;
             //console.log(ed);
         }
-        onDebugLog(response){
-            // debug出力がtrueなら出力
-            if (this.isDebug){
-                console.log(response); 
+        parseLink(target, linkMap) {
+            let src_attr = target.src || target.href;
+            if (src_attr === undefined) {
+                return;
             }
+            const link = new DownloadLink(src_attr, this.Setting);
+            linkMap.set(link.href, link.download);
         }
-        onDownload(links) {
-            for(let link of links.entries()) {
+        onDownload(linkMap) {
+            for(let link of linkMap.entries()) {
                 const param = MessageFactory.create('onDownload',
                                                     {url: link[0], filename: link[1]});
                 // ダウンロードメッセージを発火
                 try{
-                    chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
-                } catch (e) {
-                    console.log(e); 
+                    chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
+                } catch (ex) {
+                    Log.d('err', ex); 
                 }
             }
         }
     }
-    let gestures = new MouseGestures(true);
+    Log.isDebug = false;
+    let gestures = new MouseGestures();
     gestures.pageLoad();
 })();
