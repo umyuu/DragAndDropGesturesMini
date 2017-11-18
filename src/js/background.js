@@ -6,6 +6,8 @@
     // https://bugs.chromium.org/p/chromium/issues/detail?id=714373
     class Resources {
         static fetch(url) {
+            // url: ダウンロード対象
+            // manifest.json   …   web_accessible_resources
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
@@ -31,48 +33,71 @@
         OK: 200,
         NG: 400,
     };
+    class Message {
+        // Message クラス
+        // 概要：background script => content script間のデータ受け渡しに使用。
+        constructor(type, status = STATUS.OK) {
+            this.type = type;
+            this.status = status;
+        }
+        send(param = undefined){
+            var sendParams = Object.assign(this.toData(), param);
+            // background script => content script
+            // activeなtabにメッセージを送信
+            chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, sendParams, () => {});
+            });
+        }
+        toData(){
+            return {type:this.type, status:this.status};
+        }
+    }
     class Background {
         constructor() {
             this.creation_date = new Date();
             // setting.json data.
             this.data = undefined;
+            this.func = {};
             this.assignEventHandlers();
         }
         assignEventHandlers(){
+            this.func['load'] = (request, sender, sendResponse) => {
+                // async
+                Resources.fetch(request.url).then(res => {
+                    this.data = JSON.parse(res);
+                    let message = new Message(request.type);
+                    // 設定ファイル情報をコンテンツスクリプト側に送信
+                    message.send({data: this.data});
+                }).catch(e => {
+                    console.error(e);
+                    let message = new Message(request.type, STATUS.NG);
+                    message.send({data: undefined});
+                });
+                let response = new Message(request.type);
+                sendResponse(Object.assign(response.toData(), {request:request}));
+            };
+            this.func['onDownload'] = (request, sender, sendResponse) => {
+                chrome.downloads.download({
+                    url: request.url, filename: request.filename + ':::aaa'
+                }, this._onDownload);
+                let response = new Message(request.type);
+                sendResponse(Object.assign(response.toData(), {request:request}));
+            };
+            // chrome event hander.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                if(request.type === 'load'){
-                    // async
-                    Resources.fetch(request.url).then(res => {
-                        this.data = JSON.parse(res);
-                        let param = this.getResponseResult(request, STATUS.OK);
-                        param = Object.assign(param, {data: this.data});
-                        chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
-                            chrome.tabs.sendMessage(tabs[0].id, param, () => {});
-                        });
-                    }).catch(e => {
-                        console.error(e);
-                        let param = this.getResponseResult(request, STATUS.NG);
-                        param = Object.assign(param, {data: undefined});
-                        chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
-                            chrome.tabs.sendMessage(tabs[0].id, param, () => {});
-                        });
-                    });
-                    sendResponse(this.getResponseResult(request, STATUS.OK));
-                    return;
-                }
-                if(request.type === 'onDownload'){
-                    chrome.downloads.download({
-                        url: request.url, filename: request.filename
-                    });
-                    sendResponse(this.getResponseResult(request, STATUS.OK));
-                    return;
-                }
-                sendResponse(this.getResponseResult(request, STATUS.OK));
-                return;
-	       });
+                this.func[request.type](request, sender, sendResponse);
+                return true;
+            });
         }
-        getResponseResult(request, status){
-            return {type:request.type, request:request, status: status};
+        _onDownload(downloadId) {
+            //downloadId:undefined ダウンロード失敗時
+            //◆ref
+            // https://developer.chrome.com/extensions/downloads#method-download
+            if(downloadId === undefined){
+                let message = new Message('onDownload', STATUS.NG);
+                message.send({data: chrome.runtime.lastError});
+                return;
+            }
         }
     }
     let back = new Background();

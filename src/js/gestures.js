@@ -44,10 +44,15 @@
             this.Setting = undefined;
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                if(request.type === 'load'){
+                if(request.type === 'load') {
                     this.onDebugLog(request);
                     // 設定
                     this.Setting = request.data;
+                    return;
+                }
+                if(request.type === 'onDownload') {
+                    this.onDebugLog(request);
+                    return;
                 }
             });
             // 設定ファイル情報を取得
