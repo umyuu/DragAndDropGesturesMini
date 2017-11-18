@@ -1,34 +1,6 @@
 ﻿(function()
 {
 	'use strict';
-    // ref
-    // Ignore <a download> for cross origin URLs
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=714373
-    class Resources {
-        static fetch(url) {
-            // url: ダウンロード対象
-            // manifest.json   …   web_accessible_resources
-            return new Promise((resolve, reject) => {
-                let xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.timeout = 2000;
-                xhr.onload = () => {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        resolve(xhr.response);
-                    } else {
-                        reject(new Error(xhr.statusText));
-                    }
-                };
-                xhr.ontimeout = () => {
-                    reject(new Error(xhr.statusText));
-                };
-                xhr.onerror = () => {
-                    reject(new Error(xhr.statusText));
-                };
-                xhr.send(null);
-            });
-        }
-    }
     const STATUS = {
         OK: 200,
         NG: 400,
@@ -36,19 +8,36 @@
     class Message {
         // Message クラス
         // 概要：background script => content script間のデータ受け渡しに使用。
+        // ◆ref
+        // https://developer.chrome.com/extensions/messaging
         constructor(type, status = STATUS.OK) {
+            //@param {string}type メッセージ特定を特定するための文字列
+            //@param {enum}status ステータスコード
             this.type = type;
             this.status = status;
+            // tabid
+            this.dst = undefined;
+            // メッセージ作成日時(デバック用)
+            this.creation_date = new Date();
+        }
+        toCS(){
+            return;
         }
         send(param = undefined){
+            //@param {object}param メッセージボディ
             var sendParams = Object.assign(this.toData(), param);
             // background script => content script
-            // activeなtabにメッセージを送信
-            chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
-                chrome.tabs.sendMessage(tabs[0].id, sendParams, () => {});
-            });
+            if(this.dst === undefined){
+                // activetabにメッセージを送信
+                chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
+                    chrome.tabs.sendMessage(tabs[0].id, sendParams, () => {});
+                });
+            }else {
+                chrome.tabs.sendMessage(this.dst, sendParams, () => {});
+            }
         }
         toData(){
+            //@return {object}
             return {type:this.type, status:this.status};
         }
     }
@@ -66,11 +55,13 @@
                 Resources.fetch(request.url).then(res => {
                     this.data = JSON.parse(res);
                     let message = new Message(request.type);
+                    message.dst = sender.tab.id;
                     // 設定ファイル情報をコンテンツスクリプト側に送信
                     message.send({data: this.data});
-                }).catch(e => {
-                    console.error(e);
+                }).catch(ex => {
+                    console.error(ex);
                     let message = new Message(request.type, STATUS.NG);
+                    message.dst = sender.tab.id;
                     message.send({data: undefined});
                 });
                 let response = new Message(request.type);
@@ -78,7 +69,7 @@
             };
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 chrome.downloads.download({
-                    url: request.url, filename: request.filename + ':::aaa'
+                    url: request.url, filename: request.filename
                 }, this._onDownload);
                 let response = new Message(request.type);
                 sendResponse(Object.assign(response.toData(), {request:request}));
@@ -90,10 +81,11 @@
             });
         }
         _onDownload(downloadId) {
-            //downloadId:undefined ダウンロード失敗時
+            //@param downloadId     undefined ダウンロード失敗時
             //◆ref
             // https://developer.chrome.com/extensions/downloads#method-download
             if(downloadId === undefined){
+                // 
                 let message = new Message('onDownload', STATUS.NG);
                 message.send({data: chrome.runtime.lastError});
                 return;

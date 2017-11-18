@@ -42,27 +42,34 @@
         constructor(isDebug = false) {
             this.isDebug = isDebug;
             this.Setting = undefined;
+            this.func = {};
+            this.assignEventHandlers();
+        }
+        assignEventHandlers(){
+            this.func['load'] = (request, sender, sendResponse) => {
+                this.onDebugLog(request);
+                // 設定
+                this.Setting = request.data;
+                let param = MessageFactory.create(request.type);
+                sendResponse(param);
+            };
+            this.func['onDownload'] = (request, sender, sendResponse) => {
+                this.onDebugLog(request);
+                let param = MessageFactory.create(request.type);
+                sendResponse(param);
+            };
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                if(request.type === 'load') {
-                    this.onDebugLog(request);
-                    // 設定
-                    this.Setting = request.data;
-                    return;
-                }
-                if(request.type === 'onDownload') {
-                    this.onDebugLog(request);
-                    return;
-                }
+                this.func[request.type](request, sender, sendResponse);
+                return true;
             });
+            window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
+        }
+        pageLoad() {
             // 設定ファイル情報を取得
             let param = MessageFactory.create('load', 
                                               {url: chrome.extension.getURL('resources/setting.json')});
             chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
-            this.assignEventHandlers();
-        }
-        assignEventHandlers(){
-            window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
         }
         async ondragend(e) {
             //var st = window.performance.now();
@@ -93,9 +100,14 @@
             const link = new DownloadLink(src_attr, this.Setting);
             const param = MessageFactory.create('onDownload', {url: link.href, filename: link.download});
             // ダウンロードメッセージを発火
-            chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
+            try{
+                chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
+            } catch (e) {
+                console.log(e); 
+            }
+            
         }
     }
-    window.ext_mg = new MouseGestures(true);
-    console.log(new Date());
+    let gestures = new MouseGestures(true);
+    gestures.pageLoad();
 })();
