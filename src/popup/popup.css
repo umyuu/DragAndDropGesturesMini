@@ -1,0 +1,30 @@
+@charset "utf-8";
+
+body {
+    margin: 0;
+    background: #f8f4e6;
+    min-width: 600px;
+}
+body * {
+    font-family: "-apple-system", "Helvetica Neue", "游ゴシック Medium", "Yu Gothic", YuGothic, Verdana, Meiryo, sans-serif;
+    vertical-align: middle;
+}
+
+h1 {
+    font-size: 12px;
+    margin: 0;
+    padding: 4px 8px;
+    color: #fff;
+    background: #79b74a;
+}
+
+h1 a {
+    color: #fff;
+    text-decoration: none;
+}
+form#form_option {
+    margin: 0;
+    padding: 4px;
+    border: ridge 3px silver;
+    background: #fbfaf5;
+}
