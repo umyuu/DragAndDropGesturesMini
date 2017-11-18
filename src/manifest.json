@@ -6,16 +6,24 @@
     "short_name": "D&D Gestures",
     "browser_action": {
         "default_icon": "./image/icon.png",
-        "default_title": "DragAndDrop Gestures Mini"
+        "default_title": "DragAndDrop Gestures Mini",
+        "default_popup": "./popup/popup.html"
     },
+    "options_page": "./popup/popup.html",
 	"permissions": [
-        "downloads"
+        "downloads", "storage"
 	],
+    "background": {
+        "page": "./background.html"
+    },
 	"content_scripts": [{
 		"matches": [ "http://*/*", "https://*/*" ],
-		"js": [ "js/gestures.js" ],
-		"run_at": "document_end"
+		"js": [ "js/log.js", "js/gestures.js" ],
+		"run_at": "document_start"
 	}],
-	"homepage_url": "https://github.com/umyuu/MouseGestures/",
-	"version": "1.0.3"
+	"homepage_url": "https://github.com/umyuu/DragAndDropGesturesMini/",
+    "web_accessible_resources":[
+        "resources/setting.json"
+    ],
+	"version": "1.0.4"
 }
