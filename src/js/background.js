@@ -51,12 +51,12 @@
                     let message = new Message(request.type);
                     message.dst = sender.tab.id;
                     // 設定ファイル情報をコンテンツスクリプト側に送信
-                    message.send({data: this.data});
+                    message.send({payload: this.data});
                 }).catch(ex => {
                     console.error(ex);
                     let message = new Message(request.type, STATUS.NG);
                     message.dst = sender.tab.id;
-                    message.send({data: undefined});
+                    message.send({payload: undefined});
                 });
                 let response = new Message(request.type);
                 sendResponse(Object.assign(response.toData(), {request:request}));
@@ -70,10 +70,10 @@
                     message.dst = sender.tab.id;
                     if(res === undefined){
                         message.status = STATUS.NG;
-                        message.send({data: chrome.runtime.lastError});
+                        message.send({payload: chrome.runtime.lastError});
                         return;
                     }
-                    message.send({data: res});
+                    message.send({payload: res});
                 }).catch(ex => {
                     console.error(ex);
                 });

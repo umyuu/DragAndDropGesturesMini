@@ -49,7 +49,7 @@
             this.func['load'] = (request, sender, sendResponse) => {
                 this.onDebugLog(request);
                 // 設定
-                this.Setting = request.data;
+                this.Setting = request.payload;
                 let param = MessageFactory.create(request.type);
                 sendResponse(param);
             };
@@ -71,18 +71,30 @@
                                               {url: chrome.extension.getURL('resources/setting.json')});
             chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
         }
+        parseLink(target, links) {
+            let src_attr = target.src || target.href;
+            if (src_attr === undefined) {
+                return;
+            }
+            const link = new DownloadLink(src_attr, this.Setting);
+            // IMGタグとAタグでhrefが同じならば１回だけダウンロード。
+            links.set(link.href, link.download);
+        }
         async ondragend(e) {
             //var st = window.performance.now();
             const target = e.target;
             if(this.Setting === undefined) {
                 return;
             }
+            let links = new Map();
             // ダウンロード1回目
-            this.onDownload(target);
+            this.parseLink(target, links);
             // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
             if(target.parentElement.tagName.toUpperCase() === 'A'){
-                this.onDownload(target.parentElement);
+                this.parseLink(target.parentElement, links);
             }
+            
+            this.onDownload(links);
             //var ed = window.performance.now() - st;
             //console.log(ed);
         }
@@ -92,20 +104,17 @@
                 console.log(response); 
             }
         }
-        onDownload(target){
-            let src_attr = target.src || target.href;
-            if (src_attr === undefined) {
-                return;
+        onDownload(links) {
+            for(let link of links.entries()) {
+                const param = MessageFactory.create('onDownload',
+                                                    {url: link[0], filename: link[1]});
+                // ダウンロードメッセージを発火
+                try{
+                    chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
+                } catch (e) {
+                    console.log(e); 
+                }
             }
-            const link = new DownloadLink(src_attr, this.Setting);
-            const param = MessageFactory.create('onDownload', {url: link.href, filename: link.download});
-            // ダウンロードメッセージを発火
-            try{
-                chrome.runtime.sendMessage(param, e => { this.onDebugLog(e); });
-            } catch (e) {
-                console.log(e); 
-            }
-            
         }
     }
     let gestures = new MouseGestures(true);
