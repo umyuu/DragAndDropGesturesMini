@@ -28,7 +28,7 @@ class Popup {
     content(){
         let save = document.querySelector('#save');
         save.addEventListener('click', (e) => {
-            localStorage['message'] = 'test';
+            ;
         });
     }
     footer(){
