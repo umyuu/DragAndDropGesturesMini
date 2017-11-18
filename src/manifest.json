@@ -9,8 +9,11 @@
         "default_title": "DragAndDrop Gestures Mini"
     },
 	"permissions": [
-        "downloads"
+        "activeTab", "downloads"
 	],
+    "background": {
+        "page": "./background.html"
+    },
 	"content_scripts": [{
 		"matches": [ "http://*/*", "https://*/*" ],
 		"js": [ "js/gestures.js" ],

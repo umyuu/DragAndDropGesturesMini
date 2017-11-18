@@ -1,49 +1,34 @@
-﻿(function()
+﻿//@gestures.js
+(function()
 {
 	'use strict';
-    // ref
-    // Ignore <a download> for cross origin URLs
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=714373
-    class Resources {
-        static get(url) {
-            return new Promise((resolve, reject) => {
-                let xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.timeout = 2000;
-                xhr.onload = () => {
-                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                        resolve(xhr.response);
-                    } else {
-                        reject(new Error(xhr.statusText));
-                    }
-                };
-                xhr.ontimeout = () => {
-                    reject(new Error(xhr.statusText));
-                };
-                xhr.onerror = () => {
-                    reject(new Error(xhr.statusText));
-                };
-                xhr.send(null);
-            });
+    class MessageFactory {
+        // Backgroundページに対しての通信メッセージを作成するファクトリークラス。
+        // @pattern Factory
+        static create(type, options = {}){
+            // type:メッセージタイプ
+            return Object.assign({type:type}, options);
         }
     }
     class DownloadLink {
-        constructor(src_attr, domain) {
+        constructor(src_attr, setting) {
             this.src_attr = src_attr;
             if(this.isEmpty()){
                 return;
             }
+            var twitter = setting.twitter;
+            var domain = twitter.domain;
+            var suffix_large = twitter.large;
             this.href = src_attr;
-            var filename = src_attr.split('/').pop();
-            var isTwitter = src_attr.startsWith(domain);
+            let filename = src_attr.split('/').pop();
+            let isTwitter = src_attr.startsWith(domain);
             // ドメインがTwitterならlarge画像を探してダウンロード。
             if(isTwitter) {
-                // :largeファイルでは無い時。
                 var fileExt = filename.split('.').pop();
-                if(!fileExt.endsWith(':large')) {
-                    this.href = this.href + ":large";
+                if(fileExt.endsWith(suffix_large)) {
+                    filename = filename.replace(/:large/g, '_large') + '.' + fileExt.replace(/:large/g, '');
                 } else {
-                    filename = filename + '.' + fileExt.replace(/:large/g, '');
+                    this.href = this.href + suffix_large;
                 }
             }
             // filename
@@ -54,44 +39,58 @@
         }
     }
     class MouseGestures {
-        constructor() {
-            this.data = undefined;
-            window.addEventListener('dragend', e => { this.ondragend(e); }, false);
-            Resources.get(chrome.extension.getURL('resources/setting.json')).then(res => {
-                this.data = JSON.parse(res);
-                console.log(this.data);
-            }).catch(e => {
-                console.error(e);
+        constructor(isDebug = false) {
+            this.isDebug = isDebug;
+            this.Setting = undefined;
+            // background script => contents script callback.
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                if(request.type === 'load'){
+                    this.onDebugLog(request);
+                    // 設定
+                    this.Setting = request.data;
+                }
             });
+            // 設定ファイル情報を取得
+            let param = MessageFactory.create('load', 
+                                              {url: chrome.extension.getURL('resources/setting.json')});
+            chrome.runtime.sendMessage(param, response => { this.onDebugLog(response); });
+            this.assignEventHandlers();
+        }
+        assignEventHandlers(){
+            window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
         }
         async ondragend(e) {
             //var st = window.performance.now();
             const target = e.target;
+            if(this.Setting === undefined) {
+                return;
+            }
+            // ダウンロード1回目
             this.onDownload(target);
+            // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
             if(target.parentElement.tagName.toUpperCase() === 'A'){
                 this.onDownload(target.parentElement);
             }
             //var ed = window.performance.now() - st;
             //console.log(ed);
         }
+        onDebugLog(response){
+            // debug出力がtrueなら出力
+            if (this.isDebug){
+                console.log(response); 
+            }
+        }
         onDownload(target){
-            var src_attr = target.src || target.href;
+            let src_attr = target.src || target.href;
             if (src_attr === undefined) {
                 return;
             }
-            const link = new DownloadLink(src_attr, this.data['twitter']);
-            const element = document.createElement('a');
-            element.href = link.href;
-            // filename
-            element.download = link.download;
-            element.click();
-            //const param = {url: link.href, filename: link.download};
-            //chrome.runtime.sendMessage(param);
-            //browser.downloads.download({
-            //    url: link.href, 
-            //    filename: link.download
-            //});
+            const link = new DownloadLink(src_attr, this.Setting);
+            const param = MessageFactory.create('onDownload', {url: link.href, filename: link.download});
+            // ダウンロードメッセージを発火
+            chrome.runtime.sendMessage(param, response => { this.onDebugLog(response); });
         }
     }
-    window.ext_mg = new MouseGestures();
+    window.ext_mg = new MouseGestures(true);
+    console.log(new Date());
 })();

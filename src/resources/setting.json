@@ -1,4 +1,7 @@
 {
 	"version": "1",
-    "twitter": "https://pbs.twimg.com/media/"
+    "twitter": {
+        "domain" : "https://pbs.twimg.com/media/",
+        "large" : ":large"
+    }
 }
