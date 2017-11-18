@@ -2,17 +2,25 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Popup - DragAndDrop Gestures Mini</title>
     <link rel="stylesheet" href="./popup.css">
+    <script src="../3rdparty/clipboard.js/clipboard.min.js"></script>
     <script src="./popup.js" defer></script>
 </head>
 <body>
-<div id="header"><h1><span id="title"></span> version <span id="version"></span></h1></div>
-<div id="content">
-<form id="form_option">
-        <button  id="save" type='submit' name='action' value='save'>保存</button>
-</form>
-</div>
-<div id="footer"><div id="creation_date"></div></div>
+    <header class="l-header" role="banner">
+        <h1><span id="title"></span> version <span id="version"></span></h1>
+    </header>
+    <main role="main">
+        <form id="form_option">
+            <button id="save" type='submit' name='action' value='save'>保存</button>
+        </form>
+    </main>
+    <footer role="contentinfo">
+        <div>
+        <span id="creation_date"></span>
+            <button id="copy_button" data-clipboard-target="#creation_date">クリップボードにコピー</button>
+        </div></footer>
 </body>
 </html>

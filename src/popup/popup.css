@@ -9,20 +9,20 @@ body * {
     font-family: "-apple-system", "Helvetica Neue", "游ゴシック Medium", "Yu Gothic", YuGothic, Verdana, Meiryo, sans-serif;
     vertical-align: middle;
 }
-
+header {
+    color: #fff;
+    background: #79b74a; 
+}
 h1 {
     font-size: 12px;
     margin: 0;
     padding: 4px 8px;
-    color: #fff;
-    background: #79b74a;
 }
-
 h1 a {
     color: #fff;
     text-decoration: none;
 }
-form#form_option {
+main {
     margin: 0;
     padding: 4px;
     border: ridge 3px silver;

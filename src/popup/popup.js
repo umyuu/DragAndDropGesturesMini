@@ -35,10 +35,17 @@ class Popup {
         let creation_date = document.querySelector('#creation_date');
         creation_date.textContent = this.creation_date;
     }
+    generate(){
+        this.header();
+        this.content();
+        this.footer();
+    }
 }
 document.addEventListener('DOMContentLoaded', (event) => {
     let popup = new Popup();
-    popup.header();
-    popup.content();
-    popup.footer();
+    popup.generate();
+    let clipboard = new Clipboard('#copy_button');
+    clipboard.on('success', (e) => {
+        e.clearSelection();
+    });
 });
