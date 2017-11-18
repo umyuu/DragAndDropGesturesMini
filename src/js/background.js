@@ -15,7 +15,7 @@
             //@param {enum}status ステータスコード
             this.type = type;
             this.status = status;
-            // tabid
+            // content scriptの宛先 実体はtab id
             this.dst = undefined;
             // メッセージ作成日時(デバック用)
             this.creation_date = new Date();
@@ -27,14 +27,8 @@
             //@param {object}param メッセージボディ
             var sendParams = Object.assign(this.toData(), param);
             // background script => content script
-            if(this.dst === undefined){
-                // activetabにメッセージを送信
-                chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
-                    chrome.tabs.sendMessage(tabs[0].id, sendParams, () => {});
-                });
-            }else {
-                chrome.tabs.sendMessage(this.dst, sendParams, () => {});
-            }
+            console.assert(this.dst != undefined);
+            chrome.tabs.sendMessage(this.dst, sendParams, () => {});
         }
         toData(){
             //@return {object}
@@ -68,9 +62,21 @@
                 sendResponse(Object.assign(response.toData(), {request:request}));
             };
             this.func['onDownload'] = (request, sender, sendResponse) => {
-                chrome.downloads.download({
-                    url: request.url, filename: request.filename
-                }, this._onDownload);
+                this._onDownload(request.url, request.filename).then(res => {
+                    //@param res     undefined ダウンロード失敗時
+                    //◆ref
+                    // https://developer.chrome.com/extensions/downloads#method-download
+                    let message = new Message(request.type);
+                    message.dst = sender.tab.id;
+                    if(res === undefined){
+                        message.status = STATUS.NG;
+                        message.send({data: chrome.runtime.lastError});
+                        return;
+                    }
+                    message.send({data: res});
+                }).catch(ex => {
+                    console.error(ex);
+                });
                 let response = new Message(request.type);
                 sendResponse(Object.assign(response.toData(), {request:request}));
             };
@@ -80,18 +86,14 @@
                 return true;
             });
         }
-        _onDownload(downloadId) {
-            //@param downloadId     undefined ダウンロード失敗時
-            //◆ref
-            // https://developer.chrome.com/extensions/downloads#method-download
-            if(downloadId === undefined){
-                // 
-                let message = new Message('onDownload', STATUS.NG);
-                message.send({data: chrome.runtime.lastError});
-                return;
-            }
-            let message = new Message('onDownload', STATUS.OK);
-            message.send({data: downloadId});
+        _onDownload(url, filename) {
+            //@param url       ダウンロード対象URL
+            //@param filename  保存ファイル名
+            return new Promise((resolve, reject) => {
+                chrome.downloads.download({ url: url, filename: filename}, (e) => {
+                    resolve(e);   
+                });
+            });
         }
     }
     let back = new Background();

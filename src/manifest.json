@@ -11,7 +11,7 @@
     },
     "options_page": "./popup/popup.html",
 	"permissions": [
-        "activeTab", "downloads"
+        "downloads", "storage"
 	],
     "background": {
         "page": "./background.html"
