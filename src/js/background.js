@@ -90,6 +90,8 @@
                 message.send({data: chrome.runtime.lastError});
                 return;
             }
+            let message = new Message('onDownload', STATUS.OK);
+            message.send({data: downloadId});
         }
     }
     let back = new Background();
