@@ -45,13 +45,6 @@
             this.assignEventHandler();
         }
         assignEventHandler(){
-            this.func['load'] = (request, sender, sendResponse) => {
-                Log.d('net', request);
-                // 設定
-                this.Setting = request.payload;
-                let param = MessageFactory.create(request.type);
-                sendResponse(param);
-            };
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
                 let param = MessageFactory.create(request.type);
@@ -68,8 +61,11 @@
             // 設定ファイル情報を取得
             let param = MessageFactory.create('GET', 
                                               {url: chrome.extension.getURL('resources/setting.json')});
-            
-            chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
+            chrome.runtime.sendMessage(param, (response) => {
+                let data = JSON.parse(response);
+                Log.d('net', data);
+                this.Setting = data.payload;
+            });
         }
         async ondragend(e) {
             //EntryPoint
@@ -105,7 +101,10 @@
                                                     {url: link[0], filename: link[1]});
                 // ダウンロードメッセージを発火
                 try{
-                    chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
+                    chrome.runtime.sendMessage(param, (response) => {
+                        let data = JSON.parse(response);
+                        Log.d('net', data);
+                    });
                 } catch (ex) {
                     Log.e('net', ex);
                 }

@@ -5,16 +5,22 @@
         // 開発時のデバック出力用
         // F12キーで開発者ツールを呼び出せます。
         static init(){
-            Log.setLevel(0);
-            Log.setEnabled(false);
-            Log.STYLE = {
+            //const
+            Log.LEVEL = Object.freeze({
+                DEBUG: Symbol('debug'),
+                ERROR: Symbol('error'),
+                VERBOSE: Symbol('verbose')    
+            });
+            Log.STYLE = Object.freeze({
                 TAG : 'color:red;background-color:#f7f7f7;',
                 MSG : 'color:black;background-color:white;'
-            };
+            });
+            Log.setLevel(Log.LEVEL.DEBUG);
+            Log.setEnabled(false);
         }
-        static setLevel(level) {
+        static setLevel(l) {
             //@param level ログ出力レベル
-            Log.level = level;
+            Log.l = l;
         }
         static setEnabled(b) {
             //@param b  true:ログ出力が使用可能

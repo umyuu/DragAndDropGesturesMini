@@ -1,10 +1,10 @@
 ﻿(function()
 {
 	'use strict';
-    const STATUS = {
+    const STATUS = Object.freeze({
         OK: 200,
         NG: 400,
-    };
+    });
     class Message {
         // Message クラス
         // 概要：background script => content script間のデータ受け渡しに使用。
@@ -18,10 +18,13 @@
             // content scriptの宛先 実体はtab id
             this.dst = undefined;
             // メッセージ作成日時(デバック用)
-            this.creation_date = new Date();
+            this.date = new Date();
         }
-        static toContentScript(){
-            return;
+        sendAction(callback){
+            console.assert(callback != undefined);
+            let json_data = JSON.stringify(this);
+            Log.v('net', this);
+            callback(json_data);
         }
         send(param = undefined){
             //@param {object}param メッセージボディ
@@ -35,11 +38,15 @@
             return {type:this.type, status:this.status};
         }
     }
+    class CSResponse extends Message {
+        constructor(type, status = STATUS.OK) {
+            super(type, status);
+            this.payload = undefined;
+        }
+    }
     class Background {
         constructor() {
             this.creation_date = new Date();
-            // setting.json data.
-            this.data = undefined;
             this.assignEventHandler();
         }
         assignEventHandler(){
@@ -76,24 +83,23 @@
                 //◆ref
                 // Fetch API
                 // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
-                // async
-                fetch(request.url)
-                    .then(this.status)
-                    .then(this.json)
-                    .then((data) => {
-                        this.data = data;
-                        let message = new Message('load');
-                        message.dst = sender.tab.id;
-                        // 設定ファイル情報をコンテンツスクリプト側に送信
-                        message.send({payload: this.data});
-                    }).catch((ex) => {
-                        Log.e('net', ex);
-                        let message = new Message('load', STATUS.NG);
-                        message.dst = sender.tab.id;
-                        message.send({payload: undefined});
-                    });
-                let response = new Message('load');
-                sendResponse(Object.assign(response.toData(), {request:request}));
+                // async => await
+                (async() => {
+                    let csResponse = new CSResponse(request.type);
+                    csResponse.request = request;
+                    
+                    try{
+                        const response = await fetch(request.url);
+                        csResponse.status = response.status;
+                        if(response.status >= 200 && response.status < 300) {
+                            csResponse.payload = await response.json();
+                        }
+                    } catch(ex) {
+                        csResponse.status = STATUS.NG;
+                        csResponse.ex = ex;
+                    }
+                    csResponse.sendAction(sendResponse);
+                })();
             } else {
                 this.onDownload(request.url, request.filename).then(res => {
                     //@param res     undefined ダウンロード失敗時
@@ -113,13 +119,11 @@
                     message.dst = sender.tab.id;
                     message.send({payload: chrome.runtime.lastError});
                 });
-                let response = new Message('onDownload');
-                let param = Object.assign(response.toData(), {request:request});
-                Log.d('net', param);
-                sendResponse(param);sendResponse
+                let csResponse = new CSResponse(request.type);
+                csResponse.request = request;
+                csResponse.sendAction(sendResponse);
             }
         }
-
     }
     Log.setEnabled(true);
     let back = new Background();
