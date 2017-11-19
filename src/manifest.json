@@ -25,5 +25,5 @@
     "web_accessible_resources":[
         "resources/setting.json"
     ],
-	"version": "1.0.4"
+	"version": "1.0.5"
 }
