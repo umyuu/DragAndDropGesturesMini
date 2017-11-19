@@ -107,12 +107,12 @@
                 try{
                     chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
                 } catch (ex) {
-                    Log.d('err', ex); 
+                    Log.e('net', ex);
                 }
             }
         }
     }
-    Log.isDebug = false;
+    Log.setEnabled(true);
     let gestures = new MouseGestures();
     gestures.pageLoad();
 })();

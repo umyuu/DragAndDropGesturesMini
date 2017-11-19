@@ -53,12 +53,13 @@
                     // 設定ファイル情報をコンテンツスクリプト側に送信
                     message.send({payload: this.data});
                 }).catch(ex => {
-                    console.error(ex);
+                    Log.e('net', ex);
                     let message = new Message(request.type, STATUS.NG);
                     message.dst = sender.tab.id;
                     message.send({payload: undefined});
                 });
                 let response = new Message(request.type);
+                
                 sendResponse(Object.assign(response.toData(), {request:request}));
             };
             this.func['onDownload'] = (request, sender, sendResponse) => {
@@ -75,13 +76,16 @@
                     }
                     message.send({payload: res});
                 }).catch(ex => {
-                    console.error(ex);
+                    Log.e('net', ex);
                     let message = new Message(request.type, STATUS.NG);
                     message.dst = sender.tab.id;
                     message.send({payload: chrome.runtime.lastError});
                 });
                 let response = new Message(request.type);
-                sendResponse(Object.assign(response.toData(), {request:request}));
+                
+                let param = Object.assign(response.toData(), {request:request});
+                Log.d('net', param);
+                sendResponse(param);sendResponse
             };
             // chrome event hander.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -93,11 +97,14 @@
             //@param url       ダウンロード対象URL
             //@param filename  保存ファイル名
             return new Promise((resolve, reject) => {
-                chrome.downloads.download({ url: url, filename: filename}, (e) => {
+                let param = { url: url, filename: filename};
+                Log.v('download', param);
+                chrome.downloads.download(param, (e) => {
                     resolve(e);   
                 });
             });
         }
     }
+    Log.setEnabled(true);
     let back = new Background();
 })();
