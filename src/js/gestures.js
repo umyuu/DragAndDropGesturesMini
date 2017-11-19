@@ -42,9 +42,9 @@
         constructor() {
             this.Setting = undefined;
             this.func = {};
-            this.assignEventHandlers();
+            this.assignEventHandler();
         }
-        assignEventHandlers(){
+        assignEventHandler(){
             this.func['load'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
                 // 設定
@@ -66,7 +66,7 @@
         }
         pageLoad() {
             // 設定ファイル情報を取得
-            let param = MessageFactory.create('load', 
+            let param = MessageFactory.create('GET', 
                                               {url: chrome.extension.getURL('resources/setting.json')});
             
             chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
@@ -101,7 +101,7 @@
         }
         onDownload(linkMap) {
             for(let link of linkMap.entries()) {
-                const param = MessageFactory.create('onDownload',
+                const param = MessageFactory.create('GET',
                                                     {url: link[0], filename: link[1]});
                 // ダウンロードメッセージを発火
                 try{
