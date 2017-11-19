@@ -2,14 +2,6 @@
 (function()
 {
 	'use strict';
-    class MessageFactory {
-        // Backgroundページに対しての通信メッセージを作成するファクトリークラス。
-        // @pattern Factory
-        static create(type, options = {}){
-            // type:メッセージタイプ
-            return Object.assign({type:type}, options);
-        }
-    }
     class DownloadLink {
         constructor(src_attr, setting) {
             this.src_attr = src_attr;
@@ -59,11 +51,17 @@
         }
         pageLoad() {
             // 設定ファイル情報を取得
-            let param = MessageFactory.create('GET', 
-                                              {url: chrome.extension.getURL('resources/setting.json')});
+            let param = new BPRequest('GET');
+            param.url = chrome.extension.getURL('resources/setting.json');
+            Log.d('net', param);
             chrome.runtime.sendMessage(param, (response) => {
-                let data = JSON.parse(response);
-                Log.d('net', data);
+                let data = response;
+                
+                if(data.status === STATUS.NG) {
+                    Log.e('net', data);
+                }else {
+                    Log.d('net', data); 
+                }
                 this.Setting = data.payload;
             });
         }
@@ -97,16 +95,18 @@
         }
         onDownload(linkMap) {
             for(let link of linkMap.entries()) {
-                const param = MessageFactory.create('GET',
-                                                    {url: link[0], filename: link[1]});
+                const param = new BPRequest('GET');
+                param.url = link[0];
+                param.filename = link[1];
                 // ダウンロードメッセージを発火
                 try{
+                    Log.d('net', param);
                     chrome.runtime.sendMessage(param, (response) => {
-                        let data = JSON.parse(response);
+                        let data = response;
                         Log.d('net', data);
                     });
-                } catch (ex) {
-                    Log.e('net', ex);
+                } catch (err) {
+                    Log.e('net', err);
                 }
             }
         }
