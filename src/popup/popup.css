@@ -22,7 +22,7 @@ h1 a {
     color: #fff;
     text-decoration: none;
 }
-main {
+main, nav {
     margin: 0;
     padding: 4px;
     border: ridge 3px silver;

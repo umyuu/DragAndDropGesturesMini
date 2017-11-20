@@ -12,14 +12,15 @@
             //@param {string}type メッセージ特定を特定するための文字列
             this.type = type;
             // mask
-            //    0:content script → background script
-            //    1:background script → content script
-            this.mask = 0; 
+            //    0:background script → content script
+            //    1:content script → background script
+            //    
+            this.mask = 1; 
             // メッセージ送信日時(デバック用)
             this.date = new Date().toISOString();
         }
         sendAction(callback){
-            console.assert(callback != undefined);
+            console.assert(callback != undefined, arguments);
             Log.v('net', this);
             callback(this);
         }
@@ -43,7 +44,7 @@
     class CSMessageBase extends Message {
         constructor(type){
             super(type);
-            this.mask = 1;
+            this.mask = 0;
         }
     }
 
@@ -58,7 +59,7 @@
         }
         send(){
             // background script => content script
-            console.assert(this.dst != undefined);
+            console.assert(this.dst != undefined, arguments);
             chrome.tabs.sendMessage(this.dst, this, () => {});
         }
     }

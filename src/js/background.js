@@ -52,6 +52,15 @@
                     csResponse.sendAction(sendResponse);
                 })();
             } else {
+                //(async() => {
+                //    let param = { url: request.url, filename: request.filename};
+                //    Log.v('download', param);
+                //    let downloadId = await chrome.downloads.download(param);
+                ///    Log.v('download', downloadId);
+                //})();
+                
+                
+                
                 this.onDownload(request.url, request.filename).then(res => {
                     //@param res     undefined ダウンロード失敗時
                     //◆ref
@@ -78,6 +87,10 @@
             }
         }
     }
-    Log.setEnabled(true);
-    let back = new Background();
+    
+    chrome.runtime.onInstalled.addListener(details => {
+        console.log('previousVersion', details.previousVersion);
+        Log.setLevel(Log.LEVEL.VERBOSE);
+        let back = new Background();
+    });
 })();

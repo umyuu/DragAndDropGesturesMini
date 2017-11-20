@@ -65,7 +65,7 @@
                 this.Setting = data.payload;
             });
         }
-        async ondragend(e) {
+        ondragend(e) {
             //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
@@ -111,7 +111,7 @@
             }
         }
     }
-    Log.setEnabled(true);
+    Log.setLevel(Log.LEVEL.VERBOSE);
     let gestures = new MouseGestures();
     gestures.pageLoad();
 })();

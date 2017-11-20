@@ -1,0 +1,11 @@
+{
+    "popup_Button_Save": {
+        "message": "Save"
+    },
+    "popup_Button_Open": {
+        "message": "Open Download Directory..."
+    },
+    "popup_Button_Copy": {
+        "message": "Copied Clipboard"
+    }
+}

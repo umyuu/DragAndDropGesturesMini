@@ -1,0 +1,11 @@
+{
+    "popup_Button_Save": {
+        "message": "保存"
+    },
+    "popup_Button_Open": {
+        "message": "ダウンロードフォルダを開く..."
+    },
+    "popup_Button_Copy": {
+        "message": "クリップボードにコピー"
+    }
+}

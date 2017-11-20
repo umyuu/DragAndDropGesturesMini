@@ -6,6 +6,7 @@
     <title>Popup - DragAndDrop Gestures Mini</title>
     <link rel="stylesheet" href="./popup.css">
     <script src="../third_party/clipboard.js/clipboard.min.js" defer></script>
+    <script src="../js/log.js" defer></script>
     <script src="./popup.js" defer></script>
 </head>
 <body>
@@ -16,14 +17,15 @@
         <form id="form_option">
             <span id="content">開発中</span>
             <h2></h2>
-            <button id="save" type='submit' name='action' value='save'>保存</button>
-            <button id="open" type='submit' name='action' value='open'>ダウンロードフォルダを開く</button>
+            <button id="save" type='submit' name='action' value='save'></button>
+            
         </form>
     </main>
+    <nav class="menu"><button id="open" type='submit' name='action' value='open'></button></nav>
     <footer role="contentinfo">
         <div>
         <span id="creation_date"></span>
-            <button id="copy_button" data-clipboard-target="#creation_date">クリップボードにコピー</button>
+            <button id="copy_button" data-clipboard-target="#creation_date"></button>
         </div></footer>
 </body>
 </html>
