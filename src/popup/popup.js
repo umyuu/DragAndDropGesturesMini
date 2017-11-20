@@ -20,7 +20,7 @@ class Popup {
             let a = document.createElement('A');
             a.href = this.Manifest.homepage_url;
             a.target = '_blank';
-            a.textContent = this.Manifest.description;
+            a.textContent = this.Manifest.name;
             ele = document.querySelector('#title');
             ele.appendChild(a);
         

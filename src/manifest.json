@@ -1,13 +1,13 @@
 {
     "manifest_version": 2,
 	"author": "うみゅ",
-	"description": "DragAndDrop Gestures Mini",
+	"description": "__MSG_G_description__",
     "name": "DragAndDrop Gestures Mini",
-    "short_name": "D&D Gestures",
+    "short_name": "__MSG_G_short_name__",
     "default_locale": "en",
     "browser_action": {
         "default_icon": "./image/icon.png",
-        "default_title": "DragAndDrop Gestures Mini",
+        "default_title": "__MSG_G_browser_action_default_title__",
         "default_popup": "./popup/popup.html"
     },
     "options_page": "./popup/popup.html",
