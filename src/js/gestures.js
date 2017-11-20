@@ -39,8 +39,8 @@
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                let param = MessageFactory.create(request.type);
-                sendResponse(param);
+                let param = new BPResponse(request.type);
+                param.sendAction(sendResponse);
             };
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

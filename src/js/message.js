@@ -23,8 +23,19 @@
             Log.v('net', this);
             callback(this);
         }
+        
+        sendAsnc(callback){
+            return new Promise(function(resolve, reject){
+                callback(resolve, msec);
+            });
+        }
     }
     class BPRequest extends Message {
+        constructor(type) {
+            super(type);
+        }
+    }
+    class BPResponse extends Message {
         constructor(type) {
             super(type);
         }
