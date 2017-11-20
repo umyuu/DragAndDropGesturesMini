@@ -28,8 +28,14 @@ class Popup {
     content(){
         let save = document.querySelector('#save');
         save.addEventListener('click', (e) => {
-            ;
-        });
+            chrome.downloads.showDefaultFolder();
+        }, false);
+        let open = document.querySelector('#open');
+        open.addEventListener('click', (e) => {
+            chrome.downloads.showDefaultFolder();
+        }, false);
+        
+        
     }
     footer(){
         let creation_date = document.querySelector('#creation_date');
