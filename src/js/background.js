@@ -13,7 +13,7 @@
                 return true;
             });
         }
-        onDownload(url, filename) {
+        onDownloadFile(url, filename) {
             //@param url       ダウンロード対象URL
             //@param filename  保存ファイル名
             return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@
                 
                 
                 
-                this.onDownload(request.url, request.filename).then(res => {
+                this.onDownloadFile(request.url, request.filename).then(res => {
                     //@param res     undefined ダウンロード失敗時
                     //◆ref
                     // https://developer.chrome.com/extensions/downloads#method-download
