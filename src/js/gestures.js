@@ -18,7 +18,7 @@
             if(isTwitter) {
                 var fileExt = filename.split('.').pop();
                 if(fileExt.endsWith(suffix_large)) {
-                    filename = filename.replace(/:large/g, '_large') + '.' + fileExt.replace(/:large/g, '');
+                    filename = filename.replace(/:large/g, suffix_large.replace(':', '_')) + '.' + fileExt.replace(/:large/g, '');
                 } else {
                     this.href = this.href + suffix_large;
                 }
