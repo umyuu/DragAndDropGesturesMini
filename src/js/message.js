@@ -27,7 +27,7 @@
         
         sendAsnc(callback){
             return new Promise(function(resolve, reject){
-                callback(resolve, msec);
+                callback(resolve);
             });
         }
     }
@@ -60,6 +60,7 @@
         send(){
             // background script => content script
             console.assert(this.dst != undefined, arguments);
+            Log.v('net', this);
             chrome.tabs.sendMessage(this.dst, this, () => {});
         }
     }
