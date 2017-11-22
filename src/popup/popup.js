@@ -30,16 +30,11 @@ class Popup {
         }
         // header
         {
-            let ele = undefined;
-            let a = document.createElement('a');
-            a.href = this.Manifest.homepage_url;
-            a.target = '_blank';
-            a.textContent = this.Manifest.name;
-            ele = document.querySelector('#title');
-            ele.appendChild(a);
-        
-            ele = document.querySelector('#version');
-            ele.textContent = this.Manifest.version;
+            let name = document.querySelector('#name');
+            name.href = this.Manifest.homepage_url;
+            name.textContent = this.Manifest.name;
+            let version = document.querySelector('#version');
+            version.textContent = this.Manifest.version;
         }
         //content
         {

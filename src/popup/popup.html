@@ -11,21 +11,26 @@
 </head>
 <body>
     <header class="l-header" role="banner">
-        <h1><span id="title"></span> version <span id="version"></span></h1>
+        <h1>
+            <span><a id="name" target='_blank'></a> version <span id="version"></span></span>
+        </h1>
     </header>
     <main role="main">
         <form id="form_option">
             <span id="content">開発中</span>
             <h2></h2>
-            <button id="save" type='submit' name='action' data-i18n-content='popup_Button_Save' value='save'></button>
+            <button id="save" type="submit" name="action" data-i18n-content="popup_Button_Save" value="save"></button>
             
         </form>
     </main>
-    <nav><button id="open" type='submit' name='action' data-i18n-content='popup_Button_Open' value='open'></button></nav>
+    <nav>
+        <button id="open" type="submit" name="action" data-i18n-content="popup_Button_Open" value="open"></button>
+    </nav>
     <footer class="l-footer" role="contentinfo">
         <div>
-        <span id="creation_date"></span>
-            <button id="copy_button" data-i18n-content='popup_Button_Copy' data-clipboard-target="#creation_date"></button>
-        </div></footer>
+            <span id="creation_date"></span>
+            <button id="copy_button" data-i18n-content="popup_Button_Copy" data-clipboard-target="#creation_date"></button>
+        </div>
+    </footer>
 </body>
 </html>
