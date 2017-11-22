@@ -8,9 +8,9 @@
             if(this.isEmpty()){
                 return;
             }
-            var twitter = setting.twitter;
-            var domain = twitter.domain;
-            var suffix_large = twitter.large;
+            let twitter = setting.twitter;
+            let domain = twitter.domain;
+            let suffix_large = twitter.large;
             this.href = src_attr;
             let filename = src_attr.split('/').pop();
             let isTwitter = src_attr.startsWith(domain);
@@ -39,8 +39,8 @@
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                let param = new BPResponse(request.type);
-                param.sendAction(sendResponse);
+                //let param = new BPResponse(request.type);
+                //param.sendAction(sendResponse);
             };
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
