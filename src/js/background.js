@@ -42,7 +42,7 @@
                     try{
                         const response = await fetch(request.url);
                         csResponse.status = response.status;
-                        if(response.status >= 200 && response.status < 300) {
+                        if(response.ok) {
                             csResponse.payload = await response.json();
                         }
                     } catch(err) {
