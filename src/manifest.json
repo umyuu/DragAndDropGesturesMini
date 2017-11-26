@@ -15,11 +15,7 @@
         "downloads", "storage"
 	],
     "background": {
-        "scripts": [
-            "js/log.js",
-            "js/message.js",
-            "js/background.js"
-        ],
+        "page": "background.html",
         "persistent": true
     },
 	"content_scripts": [{
