@@ -2,6 +2,6 @@
 	"version": "1",
     "twitter": {
         "domain" : "https://pbs.twimg.com/media/",
-        "large" : ":large"
+        "orig" : ":orig"
     }
 }

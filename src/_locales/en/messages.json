@@ -1,0 +1,20 @@
+{
+    "G_description": {
+        "message": "Image Link Drag And Drop Download"
+    },
+    "G_short_name": {
+        "message": "D&D Gestures"
+    },
+    "G_browser_action_default_title": {
+        "message": "DragAndDrop Gestures Mini"
+    },
+    "popup_Button_Save": {
+        "message": "Save"
+    },
+    "popup_Button_Open": {
+        "message": "Open Download Directory..."
+    },
+    "popup_Button_Copy": {
+        "message": "Copied Clipboard"
+    }
+}

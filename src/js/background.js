@@ -1,103 +1,97 @@
 ﻿(function()
 {
 	'use strict';
-    const STATUS = {
-        OK: 200,
-        NG: 400,
-    };
-    class Message {
-        // Message クラス
-        // 概要：background script => content script間のデータ受け渡しに使用。
-        // ◆ref
-        // https://developer.chrome.com/extensions/messaging
-        constructor(type, status = STATUS.OK) {
-            //@param {string}type メッセージ特定を特定するための文字列
-            //@param {enum}status ステータスコード
-            this.type = type;
-            this.status = status;
-            // content scriptの宛先 実体はtab id
-            this.dst = undefined;
-            // メッセージ作成日時(デバック用)
-            this.creation_date = new Date();
-        }
-        toCS(){
-            return;
-        }
-        send(param = undefined){
-            //@param {object}param メッセージボディ
-            var sendParams = Object.assign(this.toData(), param);
-            // background script => content script
-            console.assert(this.dst != undefined);
-            chrome.tabs.sendMessage(this.dst, sendParams, () => {});
-        }
-        toData(){
-            //@return {object}
-            return {type:this.type, status:this.status};
-        }
-    }
     class Background {
         constructor() {
             this.creation_date = new Date();
-            // setting.json data.
-            this.data = undefined;
-            this.func = {};
-            this.assignEventHandlers();
+            this.assignEventHandler();
         }
-        assignEventHandlers(){
-            this.func['load'] = (request, sender, sendResponse) => {
-                // async
-                Resources.fetch(request.url).then(res => {
-                    this.data = JSON.parse(res);
-                    let message = new Message(request.type);
-                    message.dst = sender.tab.id;
-                    // 設定ファイル情報をコンテンツスクリプト側に送信
-                    message.send({payload: this.data});
-                }).catch(ex => {
-                    console.error(ex);
-                    let message = new Message(request.type, STATUS.NG);
-                    message.dst = sender.tab.id;
-                    message.send({payload: undefined});
-                });
-                let response = new Message(request.type);
-                sendResponse(Object.assign(response.toData(), {request:request}));
-            };
-            this.func['onDownload'] = (request, sender, sendResponse) => {
-                this._onDownload(request.url, request.filename).then(res => {
-                    //@param res     undefined ダウンロード失敗時
-                    //◆ref
-                    // https://developer.chrome.com/extensions/downloads#method-download
-                    let message = new Message(request.type);
-                    message.dst = sender.tab.id;
-                    if(res === undefined){
-                        message.status = STATUS.NG;
-                        message.send({payload: chrome.runtime.lastError});
-                        return;
-                    }
-                    message.send({payload: res});
-                }).catch(ex => {
-                    console.error(ex);
-                    let message = new Message(request.type, STATUS.NG);
-                    message.dst = sender.tab.id;
-                    message.send({payload: chrome.runtime.lastError});
-                });
-                let response = new Message(request.type);
-                sendResponse(Object.assign(response.toData(), {request:request}));
-            };
+        assignEventHandler(){
             // chrome event hander.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                this.func[request.type](request, sender, sendResponse);
+                this.get(request, sender, sendResponse);
                 return true;
             });
         }
-        _onDownload(url, filename) {
+        onDownloadFile(url, filename) {
             //@param url       ダウンロード対象URL
             //@param filename  保存ファイル名
             return new Promise((resolve, reject) => {
-                chrome.downloads.download({ url: url, filename: filename}, (e) => {
-                    resolve(e);   
+                let param = { url: url, filename: filename};
+                Log.v('download', param);
+                chrome.downloads.download(param, (e) => {
+                    try{
+                        resolve(e); 
+                    } catch(err) {
+                        reject(err);
+                    }
                 });
             });
         }
+        //@public
+        get(request, sender, sendResponse) {
+            const href = request.href;
+            if(href.startsWith('chrome-extension://')) {
+                //◆ref
+                // Fetch API
+                // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
+                // async => await
+                (async() => {
+                    const csResponse = new CSResponse(request.type);
+                    csResponse.request = request;
+                    
+                    try{
+                        const response = await fetch(href);
+                        csResponse.status = response.status;
+                        if(response.ok) {
+                            csResponse.payload = await response.json();
+                        }
+                    } catch(err) {
+                        csResponse.status = STATUS.NG;
+                        csResponse.err = err;
+                    }
+                    csResponse.sendAction(sendResponse);
+                })();
+            } else {
+                //(async() => {
+                //    let param = { url: request.url, filename: request.filename};
+                //    Log.v('download', param);
+                //    let downloadId = await chrome.downloads.download(param);
+                ///    Log.v('download', downloadId);
+                //})();
+                
+                
+                
+                this.onDownloadFile(href, request.filename).then(res => {
+                    //@param res     undefined ダウンロード失敗時
+                    //◆ref
+                    // https://developer.chrome.com/extensions/downloads#method-download
+                    let message = new CSRequest('onDownload');
+                    message.dst = sender.tab.id;
+                    message.payload = res;
+                    message.request = request;
+                    if(res === undefined) {
+                        message.status = STATUS.NG;
+                        message.err = chrome.runtime.lastError;
+                    }
+                    message.send();
+                }).catch(err => {
+                    Log.e('net', err);
+                    let message = new CSRequest('onDownload', STATUS.NG);
+                    message.dst = sender.tab.id;
+                    message.err = chrome.runtime.lastError;
+                    message.send();
+                });
+                const csResponse = new CSResponse(request.type);
+                csResponse.request = request;
+                csResponse.sendAction(sendResponse);
+            }
+        }
     }
-    let back = new Background();
+    
+    //chrome.runtime.onInstalled.addListener(details => {
+        //console.log('previousVersion', details.previousVersion);
+        Log.setLevel(Log.LEVEL.OFF);
+        let back = new Background();
+    //});
 })();

@@ -2,33 +2,25 @@
 (function()
 {
 	'use strict';
-    class MessageFactory {
-        // Backgroundページに対しての通信メッセージを作成するファクトリークラス。
-        // @pattern Factory
-        static create(type, options = {}){
-            // type:メッセージタイプ
-            return Object.assign({type:type}, options);
-        }
-    }
     class DownloadLink {
         constructor(src_attr, setting) {
             this.src_attr = src_attr;
             if(this.isEmpty()){
                 return;
             }
-            var twitter = setting.twitter;
-            var domain = twitter.domain;
-            var suffix_large = twitter.large;
+            let twitter = setting.twitter;
+            let domain = twitter.domain;
+            let suffix_orig = twitter.orig;
             this.href = src_attr;
             let filename = src_attr.split('/').pop();
             let isTwitter = src_attr.startsWith(domain);
-            // ドメインがTwitterならlarge画像を探してダウンロード。
+            // ドメインがTwitterならorig画像を探してダウンロード。
             if(isTwitter) {
                 var fileExt = filename.split('.').pop();
-                if(fileExt.endsWith(suffix_large)) {
-                    filename = filename.replace(/:large/g, '_large') + '.' + fileExt.replace(/:large/g, '');
+                if(fileExt.endsWith(suffix_orig)) {
+                    filename = filename.replace(/:orig/g, suffix_orig.replace(':', '_')) + '.' + fileExt.replace(/:orig/g, '');
                 } else {
-                    this.href = this.href + suffix_large;
+                    this.href = this.href + suffix_orig;
                 }
             }
             // filename
@@ -42,20 +34,13 @@
         constructor() {
             this.Setting = undefined;
             this.func = {};
-            this.assignEventHandlers();
+            this.assignEventHandler();
         }
-        assignEventHandlers(){
-            this.func['load'] = (request, sender, sendResponse) => {
-                Log.d('net', request);
-                // 設定
-                this.Setting = request.payload;
-                let param = MessageFactory.create(request.type);
-                sendResponse(param);
-            };
+        assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                let param = MessageFactory.create(request.type);
-                sendResponse(param);
+                let param = new BPResponse(request.type);
+                param.sendAction(sendResponse);
             };
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -66,12 +51,23 @@
         }
         pageLoad() {
             // 設定ファイル情報を取得
-            let param = MessageFactory.create('load', 
-                                              {url: chrome.extension.getURL('resources/setting.json')});
-            
-            chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
+            let param = new BPRequest('GET');
+            param.href = chrome.extension.getURL('resources/setting.json');
+            Log.d('net', param);
+            chrome.runtime.sendMessage(param, (response) => {
+                let data = response;
+                if(data === undefined) {
+                    return;
+                }
+                if(data.status === STATUS.NG) {
+                    Log.e('net', data);
+                }else {
+                    Log.d('net', data); 
+                }
+                this.Setting = data.payload;
+            });
         }
-        async ondragend(e) {
+        ondragend(e) {
             //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
@@ -101,18 +97,23 @@
         }
         onDownload(linkMap) {
             for(let link of linkMap.entries()) {
-                const param = MessageFactory.create('onDownload',
-                                                    {url: link[0], filename: link[1]});
+                const param = new BPRequest('GET');
+                param.href = link[0];
+                param.filename = link[1];
                 // ダウンロードメッセージを発火
                 try{
-                    chrome.runtime.sendMessage(param, e => { Log.d('net', e); });
-                } catch (ex) {
-                    Log.d('err', ex); 
+                    Log.d('net', param);
+                    chrome.runtime.sendMessage(param, (response) => {
+                        let data = response;
+                        Log.d('net', data);
+                    });
+                } catch (err) {
+                    Log.e('net', err);
                 }
             }
         }
     }
-    Log.isDebug = false;
+    Log.setLevel(Log.LEVEL.OFF);
     let gestures = new MouseGestures();
     gestures.pageLoad();
 })();

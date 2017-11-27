@@ -1,12 +1,13 @@
 {
     "manifest_version": 2,
 	"author": "うみゅ",
-	"description": "DragAndDrop Gestures Mini",
+	"description": "__MSG_G_description__",
     "name": "DragAndDrop Gestures Mini",
-    "short_name": "D&D Gestures",
+    "short_name": "__MSG_G_short_name__",
+    "default_locale": "en",
     "browser_action": {
         "default_icon": "./image/icon.png",
-        "default_title": "DragAndDrop Gestures Mini",
+        "default_title": "__MSG_G_browser_action_default_title__",
         "default_popup": "./popup/popup.html"
     },
     "options_page": "./popup/popup.html",
@@ -14,16 +15,21 @@
         "downloads", "storage"
 	],
     "background": {
-        "page": "./background.html"
+        "page": "background.html",
+        "persistent": true
     },
 	"content_scripts": [{
 		"matches": [ "http://*/*", "https://*/*" ],
-		"js": [ "js/log.js", "js/gestures.js" ],
+		"js": [
+            "js/log.js",
+            "js/message.js",
+            "js/gestures.js"
+        ],
 		"run_at": "document_start"
 	}],
-	"homepage_url": "https://github.com/umyuu/DragAndDropGesturesMini/",
+	"homepage_url": "https://github.com/umyuu/draganddropgesturesmini/",
     "web_accessible_resources":[
         "resources/setting.json"
     ],
-	"version": "1.0.4"
+	"version": "1.0.5"
 }

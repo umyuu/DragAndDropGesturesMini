@@ -1,0 +1,20 @@
+{
+    "G_description": {
+        "message": "ドラッグ＆ドロップで画像をダウンロード"
+    },
+    "G_short_name": {
+        "message": "D&D Gestures"
+    },
+    "G_browser_action_default_title": {
+        "message": "DragAndDrop Gestures Mini"
+    },
+    "popup_Button_Save": {
+        "message": "保存"
+    },
+    "popup_Button_Open": {
+        "message": "ダウンロードフォルダを開く..."
+    },
+    "popup_Button_Copy": {
+        "message": "クリップボードにコピー"
+    }
+}
