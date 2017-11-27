@@ -113,7 +113,7 @@
             }
         }
     }
-    Log.setLevel(Log.LEVEL.VERBOSE);
+    Log.setLevel(Log.LEVEL.OFF);
     let gestures = new MouseGestures();
     gestures.pageLoad();
 })();

@@ -91,7 +91,7 @@
     
     //chrome.runtime.onInstalled.addListener(details => {
         //console.log('previousVersion', details.previousVersion);
-        Log.setLevel(Log.LEVEL.VERBOSE);
+        Log.setLevel(Log.LEVEL.OFF);
         let back = new Background();
     //});
 })();

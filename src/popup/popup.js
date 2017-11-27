@@ -55,7 +55,7 @@ class Popup {
     }
 }
 document.addEventListener('DOMContentLoaded', (event) => {
-    Log.setLevel(Log.LEVEL.DEBUG);
+    Log.setLevel(Log.LEVEL.OFF);
     let popup = new Popup();
     popup.generate();
     let clipboard = new Clipboard('#copy_button');
