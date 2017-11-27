@@ -30,7 +30,8 @@
         }
         //@public
         get(request, sender, sendResponse) {
-            if(request.url.startsWith('chrome-extension://')) {
+            const href = request.href;
+            if(href.startsWith('chrome-extension://')) {
                 //◆ref
                 // Fetch API
                 // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
@@ -40,7 +41,7 @@
                     csResponse.request = request;
                     
                     try{
-                        const response = await fetch(request.url);
+                        const response = await fetch(href);
                         csResponse.status = response.status;
                         if(response.ok) {
                             csResponse.payload = await response.json();
@@ -61,7 +62,7 @@
                 
                 
                 
-                this.onDownloadFile(request.url, request.filename).then(res => {
+                this.onDownloadFile(href, request.filename).then(res => {
                     //@param res     undefined ダウンロード失敗時
                     //◆ref
                     // https://developer.chrome.com/extensions/downloads#method-download
@@ -88,9 +89,9 @@
         }
     }
     
-    chrome.runtime.onInstalled.addListener(details => {
-        console.log('previousVersion', details.previousVersion);
+    //chrome.runtime.onInstalled.addListener(details => {
+        //console.log('previousVersion', details.previousVersion);
         Log.setLevel(Log.LEVEL.VERBOSE);
         let back = new Background();
-    });
+    //});
 })();

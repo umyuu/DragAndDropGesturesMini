@@ -10,17 +10,17 @@
             }
             let twitter = setting.twitter;
             let domain = twitter.domain;
-            let suffix_large = twitter.large;
+            let suffix_orig = twitter.orig;
             this.href = src_attr;
             let filename = src_attr.split('/').pop();
             let isTwitter = src_attr.startsWith(domain);
-            // ドメインがTwitterならlarge画像を探してダウンロード。
+            // ドメインがTwitterならorig画像を探してダウンロード。
             if(isTwitter) {
                 var fileExt = filename.split('.').pop();
-                if(fileExt.endsWith(suffix_large)) {
-                    filename = filename.replace(/:large/g, suffix_large.replace(':', '_')) + '.' + fileExt.replace(/:large/g, '');
+                if(fileExt.endsWith(suffix_orig)) {
+                    filename = filename.replace(/:orig/g, suffix_orig.replace(':', '_')) + '.' + fileExt.replace(/:orig/g, '');
                 } else {
-                    this.href = this.href + suffix_large;
+                    this.href = this.href + suffix_orig;
                 }
             }
             // filename
@@ -39,8 +39,8 @@
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                //let param = new BPResponse(request.type);
-                //param.sendAction(sendResponse);
+                let param = new BPResponse(request.type);
+                param.sendAction(sendResponse);
             };
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -52,11 +52,13 @@
         pageLoad() {
             // 設定ファイル情報を取得
             let param = new BPRequest('GET');
-            param.url = chrome.extension.getURL('resources/setting.json');
+            param.href = chrome.extension.getURL('resources/setting.json');
             Log.d('net', param);
             chrome.runtime.sendMessage(param, (response) => {
                 let data = response;
-                
+                if(data === undefined) {
+                    return;
+                }
                 if(data.status === STATUS.NG) {
                     Log.e('net', data);
                 }else {
@@ -96,7 +98,7 @@
         onDownload(linkMap) {
             for(let link of linkMap.entries()) {
                 const param = new BPRequest('GET');
-                param.url = link[0];
+                param.href = link[0];
                 param.filename = link[1];
                 // ダウンロードメッセージを発火
                 try{
