@@ -12,6 +12,7 @@ class Popup {
     constructor() {
         this.Manifest = chrome.runtime.getManifest();
         this.creation_date = new Date();
+        Object.seal(this);
     }
     generate(){
         {

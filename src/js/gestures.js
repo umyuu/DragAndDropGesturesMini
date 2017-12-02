@@ -35,6 +35,7 @@
             this.Setting = undefined;
             this.func = {};
             this.assignEventHandler();
+            Object.seal(this);
         }
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
@@ -113,7 +114,7 @@
             }
         }
     }
-    Log.setLevel(Log.LEVEL.OFF);
+    Log.setLevel(Log.LEVEL.VERBOSE);
     let gestures = new MouseGestures();
     gestures.pageLoad();
 })();

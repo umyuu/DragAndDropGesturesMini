@@ -5,6 +5,7 @@
         constructor() {
             this.creation_date = new Date();
             this.assignEventHandler();
+            Object.seal(this);
         }
         assignEventHandler(){
             // chrome event hander.
@@ -91,7 +92,7 @@
     
     //chrome.runtime.onInstalled.addListener(details => {
         //console.log('previousVersion', details.previousVersion);
-        Log.setLevel(Log.LEVEL.OFF);
+        Log.setLevel(Log.LEVEL.VERBOSE);
         let back = new Background();
     //});
 })();

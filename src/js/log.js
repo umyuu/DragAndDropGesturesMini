@@ -17,6 +17,7 @@
                 MSG : 'color:black;background-color:white;'
             });
             Log.setLevel(Log.LEVEL.OFF);
+            Object.seal(Log);
         }
         static setLevel(level) {
             //@param level ログ出力レベル
