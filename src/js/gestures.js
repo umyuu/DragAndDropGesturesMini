@@ -5,26 +5,36 @@
     class DownloadLink {
         constructor(src_attr, setting) {
             this.src_attr = src_attr;
-            if(this.isEmpty()){
-                return;
-            }
-            let twitter = setting.twitter;
-            let domain = twitter.domain;
-            let suffix_orig = twitter.orig;
-            this.href = src_attr;
-            let filename = src_attr.split('/').pop();
-            let isTwitter = src_attr.startsWith(domain);
-            // ドメインがTwitterならorig画像を探してダウンロード。
+            console.assert(!this.isEmpty(), arguments);
+            this.twitter = setting.twitter;
+            // basepathのみ
+            this.basepath_array = src_attr.split('/');
+            const filename = this.basepath_array.pop();
+            let isTwitter = src_attr.startsWith(this.twitter.domain);
             if(isTwitter) {
-                var fileExt = filename.split('.').pop();
-                if(fileExt.endsWith(suffix_orig)) {
-                    filename = filename.replace(/:orig/g, suffix_orig.replace(':', '_')) + '.' + fileExt.replace(/:orig/g, '');
-                } else {
-                    this.href = this.href + suffix_orig;
-                }
+                this.parse_domain_Twitter(filename);
+            }else {
+                this.href = src_attr;
+                // filename
+                this.download = filename;
             }
-            // filename
-            this.download = filename;
+            Object.seal(this);
+        }
+        parse_domain_Twitter(filename) {
+            // ドメインがTwitterならorig画像を探してダウンロード。
+            //@param {string}filename URLのfilename部分
+            // | exsample.jpg        => exsample.jpg:orig
+            // | exsample.jpg:orig   => exsample.jpg:orig
+            // | exsample.jpg:small  => exsample.jpg:orig
+            
+            // :small部分を削除(pop)して、:origを追加
+            let scale_array = filename.split(':');
+            if(scale_array.length >= 2) {
+                scale_array.pop();
+            }
+            this.href = this.basepath_array.concat(
+                scale_array.toString() + this.twitter.orig).join('/');
+            this.download = scale_array.toString();
         }
         isEmpty() {
             return this.src_attr === undefined;
