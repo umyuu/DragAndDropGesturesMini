@@ -7,7 +7,6 @@
         // □Usage.
         //   Log.v('tag', 'message');
         constructor() {
-            //const
             this.LEVEL = Object.freeze({
                 VERBOSE: 1,
                 DEBUG: 2,
