@@ -2,15 +2,16 @@
 (function()
 {
 	'use strict';
+    // 
+    let Setting = undefined;
     class DownloadLink {
-        constructor(src_attr, setting) {
+        constructor(src_attr) {
             this.src_attr = src_attr;
-            console.assert(!this.isEmpty(), arguments);
-            this.twitter = setting.twitter;
+            console.assert(!this.validated, arguments);
             // basepathのみ
             this.basepath_array = src_attr.split('/');
             const filename = this.basepath_array.pop();
-            let isTwitter = src_attr.startsWith(this.twitter.domain);
+            let isTwitter = src_attr.startsWith(Setting.twitter.domain);
             if(isTwitter) {
                 this.parse_domain_Twitter(filename);
             }else {
@@ -33,16 +34,15 @@
                 scale_array.pop();
             }
             this.href = this.basepath_array.concat(
-                scale_array.toString() + this.twitter.orig).join('/');
+                scale_array.toString() + Setting.twitter.orig).join('/');
             this.download = scale_array.toString();
         }
-        isEmpty() {
+        get validated() {
             return this.src_attr === undefined;
         }
     }
     class MouseGestures {
         constructor() {
-            this.Setting = undefined;
             this.func = {};
             this.assignEventHandler();
             Object.seal(this);
@@ -75,14 +75,14 @@
                 }else {
                     Log.d('net', data); 
                 }
-                this.Setting = data.payload;
+                Setting = data.payload;
             });
         }
         ondragend(e) {
             //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
-            if(this.Setting === undefined) {
+            if(Setting === undefined) {
                 return;
             }
             console.assert(target != undefined);
@@ -103,7 +103,7 @@
             if (src_attr === undefined) {
                 return;
             }
-            const link = new DownloadLink(src_attr, this.Setting);
+            const link = new DownloadLink(src_attr);
             linkMap.set(link.href, link.download);
         }
         onDownload(linkMap) {
