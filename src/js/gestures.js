@@ -107,10 +107,10 @@
             linkMap.set(link.href, link.download);
         }
         onDownload(linkMap) {
-            for(let link of linkMap.entries()) {
+            linkMap.forEach((value, key, map) => {
                 const param = new BPRequest('GET');
-                param.href = link[0];
-                param.filename = link[1];
+                param.href = key;
+                param.filename = value;
                 // ダウンロードメッセージを発火
                 try{
                     Log.d('net', param);
@@ -121,7 +121,7 @@
                 } catch (err) {
                     Log.e('net', err);
                 }
-            }
+            });
         }
     }
     Log.setLevel(Log.LEVEL.VERBOSE);
