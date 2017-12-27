@@ -15,8 +15,8 @@ class Popup {
         Object.seal(this);
     }
     generate(){
+        // i18n
         {
-            // i18n
             // 検索範囲：body要素以下
             // 検索値：data-i18n-contentが属性に存在すること。
             // 処理：上記属性が存在時に_locales/(ロケール名)/message.json よりメッセージを取得しtextContentに設定
@@ -39,10 +39,31 @@ class Popup {
         }
         //content
         {
-            const save = document.querySelector('#save');
-            save.addEventListener('click', (e) => {
-                chrome.downloads.showDefaultFolder();
-            }, false);
+            const loglevel_name = 'loglevel';
+            const loglevel_list = document.querySelector('#loglevel_list');
+            for(const [key, value] of Object.entries(Log.LEVEL)) {
+                const radio = document.createElement('input');
+                const id_str = `${loglevel_name}_${value}`;
+                radio.id = id_str;
+                radio.type = 'radio';
+                radio.name = loglevel_name;
+                radio.value = value;
+                if(Log.LEVEL.OFF === value) {
+                    radio.checked = 'checked';
+                }
+                radio.addEventListener('click', (e) => {
+                    const value = document.querySelector(`input[name="${loglevel_name}"]:checked`).value;
+                    chrome.storage.local.set({'Log_LEVEL': value}, (items) => {
+                        console.log('aaaa', value);
+                    });
+                }, false);
+                loglevel_list.appendChild(radio);
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', id_str);
+                label.textContent = key;
+                loglevel_list.appendChild(label);
+            }
             const open = document.querySelector('#open');
             open.addEventListener('click', (e) => {
                 chrome.downloads.showDefaultFolder();
@@ -56,11 +77,15 @@ class Popup {
     }
 }
 document.addEventListener('DOMContentLoaded', (event) => {
-    Log.setLevel(Log.LEVEL.OFF);
-    const popup = new Popup();
-    popup.generate();
-    const clipboard = new Clipboard('#copy_button');
-    clipboard.on('success', (e) => {
-        e.clearSelection();
+    chrome.storage.local.get('Log_LEVEL', (items) => {
+        const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+        //string->int変換
+        Log.setLevel(+log_level);
+        const popup = new Popup();
+        popup.generate();
+        const clipboard = new Clipboard('#copy_button');
+        clipboard.on('success', (e) => {
+            e.clearSelection();
+        });
     });
 });

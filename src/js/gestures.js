@@ -121,7 +121,11 @@
             }
         }
     }
-    Log.setLevel(Log.LEVEL.VERBOSE);
-    const gestures = new MouseGestures();
-    gestures.pageLoad();
+    chrome.storage.local.get('Log_LEVEL', (items) => {
+        const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+        //string->int変換
+        Log.setLevel(+log_level);
+        const gestures = new MouseGestures();
+        gestures.pageLoad();
+    });
 })();

@@ -21,12 +21,14 @@
         <form id="form_option">
             <span id="content">開発中</span>
             <h2></h2>
-            <button id="save" type="submit" name="action" data-i18n-content="popup_Button_Save" value="save"></button>
-            
+            <fieldset>
+                <legend data-i18n-content="popup_Label_LogLevel"></legend>
+                <div id="loglevel_list"></div>
+            </fieldset> 
         </form>
     </main>
     <nav>
-        <button id="open" type="submit" name="action" data-i18n-content="popup_Button_Open" value="open"></button>
+        <button id="open" name="action" data-i18n-content="popup_Button_Open" value="open"></button>
     </nav>
     <footer class="l-footer" role="contentinfo">
         <div>
