@@ -18,6 +18,12 @@ class MainHandler(RequestHandler):
         self.render("index.html", title=self.request.uri, creation_date=creation_date, items=items)
 
 
+class NoCacheStaticFileHandler(StaticFileHandler):
+
+    def get_cache_time(self,path,modified,mime_type):
+        return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', '-p', type=int, default=8888, help='Port number')
