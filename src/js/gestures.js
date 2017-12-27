@@ -50,7 +50,7 @@
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                let param = new BPResponse(request.type);
+                const param = new BPResponse(request.type);
                 param.sendAction(sendResponse);
             };
             // background script => contents script callback.
@@ -86,7 +86,7 @@
                 return;
             }
             console.assert(target != undefined);
-            let linkMap = new Map(); // <url, filename>
+            const linkMap = new Map(); // <url, filename>
             // ダウンロード1回目
             this.parseLink(target, linkMap);
             // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
@@ -99,7 +99,7 @@
             //console.log(ed);
         }
         parseLink(target, linkMap) {
-            let src_attr = target.src || target.href;
+            const src_attr = target.src || target.href;
             if (src_attr === undefined) {
                 return;
             }
@@ -107,13 +107,13 @@
             linkMap.set(link.href, link.download);
         }
         onDownload(linkMap) {
-            linkMap.forEach((value, key, map) => {
+            for (const [key, value] of linkMap) {
                 const param = new BPRequest('GET');
                 param.href = key;
                 param.filename = value;
-                // ダウンロードメッセージを発火
                 try{
                     Log.d('net', param);
+                    // ダウンロードメッセージを発火
                     chrome.runtime.sendMessage(param, (response) => {
                         let data = response;
                         Log.d('net', data);
@@ -121,10 +121,10 @@
                 } catch (err) {
                     Log.e('net', err);
                 }
-            });
+            }
         }
     }
     Log.setLevel(Log.LEVEL.VERBOSE);
-    let gestures = new MouseGestures();
+    const gestures = new MouseGestures();
     gestures.pageLoad();
 })();

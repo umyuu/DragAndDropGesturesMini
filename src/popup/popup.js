@@ -20,13 +20,13 @@ class Popup {
             // 検索範囲：body要素以下
             // 検索値：data-i18n-contentが属性に存在すること。
             // 処理：上記属性が存在時に_locales/(ロケール名)/message.json よりメッセージを取得しtextContentに設定
-            for (let selector of document.querySelectorAll('body *')) {
+            for (const elementList of document.querySelectorAll('body *')) {
                 const i18n_content = 'data-i18n-content';
-                if(!selector.hasAttribute(i18n_content)) {
+                if(!elementList.hasAttribute(i18n_content)) {
                     continue;
                 }
-                const attr = selector.getAttribute(i18n_content);
-                selector.textContent = chrome.i18n.getMessage(attr);
+                const attr = elementList.getAttribute(i18n_content);
+                elementList.textContent = chrome.i18n.getMessage(attr);
             }
         }
         // header
