@@ -62,10 +62,9 @@
         }
         pageLoad() {
             // 設定ファイル情報を取得
-            let param = new BPRequest('GET');
+            const param = new BPRequest('GET');
             param.href = chrome.extension.getURL('resources/setting.json');
-            Log.d('net', param);
-            chrome.runtime.sendMessage(param, (response) => {
+            param.sendMessage((response) => {
                 let data = response;
                 if(data === undefined) {
                     return;
@@ -112,9 +111,7 @@
                 param.href = key;
                 param.filename = value;
                 try{
-                    Log.d('net', param);
-                    // ダウンロードメッセージを発火
-                    chrome.runtime.sendMessage(param, (response) => {
+                    param.sendMessage((response) => {
                         let data = response;
                         Log.d('net', data);
                     });

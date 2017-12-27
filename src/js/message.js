@@ -35,6 +35,11 @@
         constructor(type) {
             super(type);
         }
+        sendMessage(callback) {
+            console.assert(callback != undefined, arguments);
+            Log.d('net', this);
+            chrome.runtime.sendMessage(this, callback);
+        }
     }
     class BPResponse extends Message {
         constructor(type) {
