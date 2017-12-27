@@ -19,13 +19,13 @@
             // メッセージ送信日時(デバック用)
             this.date = new Date().toISOString();
         }
-        sendAction(callback){
+        sendAction(callback) {
             console.assert(callback != undefined, arguments);
             Log.v('net', this);
             callback(this);
         }
         
-        sendAsnc(callback){
+        sendAsnc(callback) {
             return new Promise(function(resolve, reject){
                 callback(resolve);
             });
@@ -47,7 +47,7 @@
         }
     }
     class CSMessageBase extends Message {
-        constructor(type){
+        constructor(type) {
             super(type);
             this.mask = 0;
         }
@@ -62,7 +62,7 @@
             this.status = status;
             this.payload = undefined;
         }
-        send(){
+        sendMessage() {
             // background script => content script
             console.assert(this.dst != undefined, arguments);
             Log.v('net', this);

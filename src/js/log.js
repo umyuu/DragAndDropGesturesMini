@@ -21,7 +21,7 @@
             Object.seal(this);
         }
         setLevel(level) {
-            //@param level ログ出力レベル
+            //@param {int}level ログ出力レベル
             //Log.LEVELに引数の値が存在するかのassertチェック
             console.assert(Object.entries(this.LEVEL).find(o => o[1] === level) != undefined, arguments);
             this.level = level;

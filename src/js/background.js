@@ -18,7 +18,7 @@
             //@param url       ダウンロード対象URL
             //@param filename  保存ファイル名
             return new Promise((resolve, reject) => {
-                let param = { url: url, filename: filename};
+                const param = { url: url, filename: filename};
                 Log.v('download', param);
                 chrome.downloads.download(param, (e) => {
                     try{
@@ -36,7 +36,7 @@
                 //◆ref
                 // Fetch API
                 // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
-                // async => await
+                // async => awaitの即時関数
                 (async() => {
                     const csResponse = new CSResponse(request.type);
                     csResponse.request = request;
@@ -75,13 +75,13 @@
                         message.status = STATUS.NG;
                         message.err = chrome.runtime.lastError;
                     }
-                    message.send();
+                    message.sendMessage();
                 }).catch(err => {
                     Log.e('net', err);
                     let message = new CSRequest('onDownload', STATUS.NG);
                     message.dst = sender.tab.id;
                     message.err = chrome.runtime.lastError;
-                    message.send();
+                    message.sendMessage();
                 });
                 const csResponse = new CSResponse(request.type);
                 csResponse.request = request;
@@ -92,7 +92,13 @@
     
     //chrome.runtime.onInstalled.addListener(details => {
         //console.log('previousVersion', details.previousVersion);
-        Log.setLevel(Log.LEVEL.VERBOSE);
-        let back = new Background();
+        // async function
+        chrome.storage.local.get('Log_LEVEL', (items) => {
+            const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+            //string->int変換
+            Log.setLevel(+log_level);
+            const back = new Background();
+        });
+        
     //});
 })();
