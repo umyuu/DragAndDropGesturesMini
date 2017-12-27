@@ -25,41 +25,41 @@ class Popup {
                 if(!selector.hasAttribute(i18n_content)) {
                     continue;
                 }
-                let attr = selector.getAttribute(i18n_content);
+                const attr = selector.getAttribute(i18n_content);
                 selector.textContent = chrome.i18n.getMessage(attr);
             }
         }
         // header
         {
-            let name = document.querySelector('#name');
+            const name = document.querySelector('#name');
             name.href = this.Manifest.homepage_url;
             name.textContent = this.Manifest.name;
-            let version = document.querySelector('#version');
+            const version = document.querySelector('#version');
             version.textContent = this.Manifest.version;
         }
         //content
         {
-            let save = document.querySelector('#save');
+            const save = document.querySelector('#save');
             save.addEventListener('click', (e) => {
                 chrome.downloads.showDefaultFolder();
             }, false);
-            let open = document.querySelector('#open');
+            const open = document.querySelector('#open');
             open.addEventListener('click', (e) => {
                 chrome.downloads.showDefaultFolder();
             }, false);
         }
         //footer
         {
-            let creation_date = document.querySelector('#creation_date');
+            const creation_date = document.querySelector('#creation_date');
             creation_date.textContent = this.creation_date;
         }
     }
 }
 document.addEventListener('DOMContentLoaded', (event) => {
     Log.setLevel(Log.LEVEL.OFF);
-    let popup = new Popup();
+    const popup = new Popup();
     popup.generate();
-    let clipboard = new Clipboard('#copy_button');
+    const clipboard = new Clipboard('#copy_button');
     clipboard.on('success', (e) => {
         e.clearSelection();
     });
