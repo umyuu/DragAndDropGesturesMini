@@ -92,12 +92,13 @@
     
     //chrome.runtime.onInstalled.addListener(details => {
         //console.log('previousVersion', details.previousVersion);
+        let background = undefined;
         // async function
         chrome.storage.local.get('Log_LEVEL', (items) => {
             const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
             //string->int変換
             Log.setLevel(+log_level);
-            const back = new Background();
+            background = new Background();
         });
         
     //});

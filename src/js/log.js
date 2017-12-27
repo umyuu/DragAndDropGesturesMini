@@ -8,9 +8,11 @@
         //   Log.v('tag', 'message');
         constructor() {
             this.LEVEL = Object.freeze({
-                VERBOSE: 1,
-                DEBUG: 2,
-                ERROR: 4,
+                VERBOSE: 2,
+                DEBUG: 4,
+                INFO: 8,
+                WARN: 16,
+                ERROR: 32,
                 OFF : 256,
             });
             this.STYLE = Object.freeze({
@@ -56,6 +58,10 @@
             }
             console.assert(tag != undefined, arguments);
             console.error('%c%s', this.STYLE.TAG, tag, msg);
+        }
+        wtf(tag, msg) {
+            // fatal error assert.
+            console.assert(false, arguments);
         }
     }
     const Log = new LogHandler();

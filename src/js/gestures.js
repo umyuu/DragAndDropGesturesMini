@@ -4,6 +4,7 @@
 	'use strict';
     // 
     let Setting = undefined;
+    let gestures = undefined;
     class DownloadLink {
         constructor(src_attr) {
             this.src_attr = src_attr;
@@ -125,7 +126,7 @@
         const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
         //string->int変換
         Log.setLevel(+log_level);
-        const gestures = new MouseGestures();
+        gestures = new MouseGestures();
         gestures.pageLoad();
     });
 })();
