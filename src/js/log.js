@@ -32,7 +32,7 @@
             // ログ出力レベル：verbose
             //@param tag タグ
             //@param msg メッセージ
-            if(this.level > this.LEVEL.VERBOSE) {
+            if(this.enabledFor(this.LEVEL.VERBOSE)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -42,18 +42,40 @@
             // ログ出力レベル：debug
             //@param tag タグ
             //@param msg メッセージ
-            if(this.level > this.LEVEL.DEBUG) {
+            if(this.enabledFor(this.LEVEL.DEBUG)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
             console.log('%c%s', this.STYLE.TAG, tag, msg);
+        }
+        i(tag, msg) {
+            // ログ出力レベル：info
+            // console.infoに出力
+            //@param tag タグ
+            //@param msg メッセージ
+            if(this.enabledFor(this.LEVEL.INFO)) {
+                return;
+            }
+            console.assert(tag != undefined, arguments);
+            console.info('%c%s', this.STYLE.TAG, tag, msg);
+        }
+        w(tag, msg) {
+            // ログ出力レベル：error
+            // console.warnに出力
+            //@param tag タグ
+            //@param msg メッセージ
+            if(this.enabledFor(this.LEVEL.WARN)) {
+                return;
+            }
+            console.assert(tag != undefined, arguments);
+            console.warn('%c%s', this.STYLE.TAG, tag, msg);
         }
         e(tag, msg) {
             // ログ出力レベル：error
             // console.errorに出力
             //@param tag タグ
             //@param msg メッセージ
-            if(this.level > this.LEVEL.ERROR) {
+            if(this.enabledFor(this.LEVEL.ERROR)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -62,6 +84,10 @@
         wtf(tag, msg) {
             // fatal error assert.
             console.assert(false, arguments);
+        }
+        //@private
+        enabledFor(level) {
+            return this.level > level;
         }
     }
     const Log = new LogHandler();

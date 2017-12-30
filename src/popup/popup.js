@@ -55,7 +55,7 @@ class Popup {
                 radio.addEventListener('click', (e) => {
                     const value = e.target.value;
                     chrome.storage.local.set({'Log_LEVEL': value}, (items) => {
-                        ;
+                        console.log(`${new Date().toISOString()} setLogLevel:${value}`);
                     });
                 }, false);
                 loglevel_list.appendChild(radio);
