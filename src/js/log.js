@@ -8,12 +8,13 @@
         //   Log.v('tag', 'message');
         constructor() {
             this.LEVEL = Object.freeze({
+                ALL: 1,//special level
                 VERBOSE: 2,
                 DEBUG: 4,
                 INFO: 8,
                 WARN: 16,
                 ERROR: 32,
-                OFF : 256,
+                OFF : 256,//special level
             });
             this.STYLE = Object.freeze({
                 TAG : 'color:red;background-color:#f7f7f7;',
@@ -32,7 +33,7 @@
             // ログ出力レベル：verbose
             //@param tag タグ
             //@param msg メッセージ
-            if(this.enabledFor(this.LEVEL.VERBOSE)) {
+            if(!this.enabledFor(this.LEVEL.VERBOSE)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -42,7 +43,7 @@
             // ログ出力レベル：debug
             //@param tag タグ
             //@param msg メッセージ
-            if(this.enabledFor(this.LEVEL.DEBUG)) {
+            if(!this.enabledFor(this.LEVEL.DEBUG)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -53,7 +54,7 @@
             // console.infoに出力
             //@param tag タグ
             //@param msg メッセージ
-            if(this.enabledFor(this.LEVEL.INFO)) {
+            if(!this.enabledFor(this.LEVEL.INFO)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -64,7 +65,7 @@
             // console.warnに出力
             //@param tag タグ
             //@param msg メッセージ
-            if(this.enabledFor(this.LEVEL.WARN)) {
+            if(!this.enabledFor(this.LEVEL.WARN)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -75,7 +76,7 @@
             // console.errorに出力
             //@param tag タグ
             //@param msg メッセージ
-            if(this.enabledFor(this.LEVEL.ERROR)) {
+            if(!this.enabledFor(this.LEVEL.ERROR)) {
                 return;
             }
             console.assert(tag != undefined, arguments);
@@ -87,7 +88,7 @@
         }
         //@private
         enabledFor(level) {
-            return this.level > level;
+            return this.level < level;
         }
     }
     const Log = new LogHandler();
