@@ -2,44 +2,58 @@
 (function()
 {
 	'use strict';
+    // 
+    let Setting = undefined;
+    let gestures = undefined;
     class DownloadLink {
-        constructor(src_attr, setting) {
+        constructor(src_attr) {
             this.src_attr = src_attr;
-            if(this.isEmpty()){
-                return;
-            }
-            let twitter = setting.twitter;
-            let domain = twitter.domain;
-            let suffix_orig = twitter.orig;
-            this.href = src_attr;
-            let filename = src_attr.split('/').pop();
-            let isTwitter = src_attr.startsWith(domain);
-            // ドメインがTwitterならorig画像を探してダウンロード。
+            console.assert(!this.validated, arguments);
+            // basepathのみ
+            this.basepath_array = src_attr.split('/');
+            const filename = this.basepath_array.pop();
+            let isTwitter = src_attr.startsWith(Setting.twitter.domain);
             if(isTwitter) {
-                var fileExt = filename.split('.').pop();
-                if(fileExt.endsWith(suffix_orig)) {
-                    filename = filename.replace(/:orig/g, suffix_orig.replace(':', '_')) + '.' + fileExt.replace(/:orig/g, '');
-                } else {
-                    this.href = this.href + suffix_orig;
-                }
+                this.parse_domain_Twitter(filename);
+            }else {
+                this.href = src_attr;
+                // filename
+                this.download = filename;
             }
-            // filename
-            this.download = filename;
+            Object.seal(this);
         }
-        isEmpty() {
+        parse_domain_Twitter(filename) {
+            // ドメインがTwitterならorig画像を探してダウンロード。
+            //@param {string}filename URLのfilename部分
+            // | exsample.jpg        => exsample.jpg:orig
+            // | exsample.jpg:orig   => exsample.jpg:orig
+            // | exsample.jpg:small  => exsample.jpg:orig
+            
+            // :small部分を削除(pop)して、:origを追加
+            let scale_array = filename.split(':');
+            if(scale_array.length >= 2) {
+                scale_array.pop();
+            }
+            this.href = this.basepath_array.concat(
+                scale_array.toString() + Setting.twitter.orig).join('/');
+            this.download = scale_array.toString();
+        }
+        get validated() {
             return this.src_attr === undefined;
         }
     }
     class MouseGestures {
         constructor() {
-            this.Setting = undefined;
             this.func = {};
+            this.screenX = 0;
+            this.screenY = 0;
             this.assignEventHandler();
+            //Object.seal(this);
         }
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
                 Log.d('net', request);
-                let param = new BPResponse(request.type);
+                const param = new BPResponse(request.type);
                 param.sendAction(sendResponse);
             };
             // background script => contents script callback.
@@ -47,14 +61,14 @@
                 this.func[request.type](request, sender, sendResponse);
                 return true;
             });
+            window.addEventListener('dragstart', e => { this.ondragstart(e); }, false); 
             window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
         }
         pageLoad() {
             // 設定ファイル情報を取得
-            let param = new BPRequest('GET');
+            const param = new BPRequest('GET');
             param.href = chrome.extension.getURL('resources/setting.json');
-            Log.d('net', param);
-            chrome.runtime.sendMessage(param, (response) => {
+            param.sendMessage((response) => {
                 let data = response;
                 if(data === undefined) {
                     return;
@@ -64,18 +78,35 @@
                 }else {
                     Log.d('net', data); 
                 }
-                this.Setting = data.payload;
+                Setting = data.payload;
             });
         }
+        ondragstart(e) {
+            this.screenX = e.screenX;
+            this.screenY = e.screenY;
+        }
+        
         ondragend(e) {
             //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
-            if(this.Setting === undefined) {
+            if(Setting === undefined) {
                 return;
             }
             console.assert(target != undefined);
-            let linkMap = new Map(); // <url, filename>
+
+            // ドラッグ開始とドラッグ終了のマウス座標(screen)を取得し、移動距離が短い時はダウンロードしない。
+            let distance = Math.sqrt( (this.screenX-e.screenX)**2 + (this.screenY-e.screenY)**2 );
+            if (distance < 20) {
+                let drag = new Map();
+                drag.set('dragstart', {'screenX':this.screenX, 'screenY':this.screenY});
+                drag.set('dragend', {'screenX':e.screenX, 'screenY':e.screenY});
+                drag.set('distance', distance);
+                Log.d('net', drag);
+                return;
+            }
+
+            const linkMap = new Map(); // <url, filename>
             // ダウンロード1回目
             this.parseLink(target, linkMap);
             // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
@@ -88,22 +119,20 @@
             //console.log(ed);
         }
         parseLink(target, linkMap) {
-            let src_attr = target.src || target.href;
+            const src_attr = target.src || target.href;
             if (src_attr === undefined) {
                 return;
             }
-            const link = new DownloadLink(src_attr, this.Setting);
+            const link = new DownloadLink(src_attr);
             linkMap.set(link.href, link.download);
         }
         onDownload(linkMap) {
-            for(let link of linkMap.entries()) {
+            for (const [key, value] of linkMap) {
                 const param = new BPRequest('GET');
-                param.href = link[0];
-                param.filename = link[1];
-                // ダウンロードメッセージを発火
+                param.href = key;
+                param.filename = value;
                 try{
-                    Log.d('net', param);
-                    chrome.runtime.sendMessage(param, (response) => {
+                    param.sendMessage((response) => {
                         let data = response;
                         Log.d('net', data);
                     });
@@ -113,7 +142,12 @@
             }
         }
     }
-    Log.setLevel(Log.LEVEL.OFF);
-    let gestures = new MouseGestures();
-    gestures.pageLoad();
+    //chrome.storage.local.get('Log_LEVEL', (items) => {
+    //    const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+        //string->int変換
+        //Log.setLevel(+log_level);
+        Log.setLevel(Log.LEVEL.OFF);
+        gestures = new MouseGestures();
+        gestures.pageLoad();
+    //});
 })();

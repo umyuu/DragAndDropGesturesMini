@@ -8,8 +8,8 @@
     "G_browser_action_default_title": {
         "message": "DragAndDrop Gestures Mini"
     },
-    "popup_Button_Save": {
-        "message": "Save"
+    "popup_Label_LogLevel": {
+        "message": "LogLevel"
     },
     "popup_Button_Open": {
         "message": "Open Download Directory..."

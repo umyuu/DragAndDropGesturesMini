@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="format-detection" content="telephone=no">
     <title>Popup - DragAndDrop Gestures Mini</title>
-    <link rel="stylesheet" href="./popup.css">
+    <link rel="stylesheet" href="./popup.css" as="style">
     <script src="../third_party/clipboard.js/clipboard.min.js" defer></script>
+    <script src="../js/clock.js" defer></script>
     <script src="../js/log.js" defer></script>
     <script src="./popup.js" defer></script>
 </head>
@@ -19,12 +21,14 @@
         <form id="form_option">
             <span id="content">開発中</span>
             <h2></h2>
-            <button id="save" type="submit" name="action" data-i18n-content="popup_Button_Save" value="save"></button>
-            
+            <fieldset>
+                <legend data-i18n-content="popup_Label_LogLevel"></legend>
+                <div id="loglevel_list"></div>
+            </fieldset> 
         </form>
     </main>
     <nav>
-        <button id="open" type="submit" name="action" data-i18n-content="popup_Button_Open" value="open"></button>
+        <button id="open" name="action" data-i18n-content="popup_Button_Open" value="open"></button>
     </nav>
     <footer class="l-footer" role="contentinfo">
         <div>
