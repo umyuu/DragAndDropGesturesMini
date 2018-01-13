@@ -45,8 +45,10 @@
     class MouseGestures {
         constructor() {
             this.func = {};
+            this.screenX = 0;
+            this.screenY = 0;
             this.assignEventHandler();
-            Object.seal(this);
+            //Object.seal(this);
         }
         assignEventHandler(){
             this.func['onDownload'] = (request, sender, sendResponse) => {
@@ -59,6 +61,7 @@
                 this.func[request.type](request, sender, sendResponse);
                 return true;
             });
+            window.addEventListener('dragstart', e => { this.ondragstart(e); }, false); 
             window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
         }
         pageLoad() {
@@ -78,6 +81,11 @@
                 Setting = data.payload;
             });
         }
+        ondragstart(e) {
+            this.screenX = e.screenX;
+            this.screenY = e.screenY;
+        }
+        
         ondragend(e) {
             //EntryPoint
             //var st = window.performance.now();
@@ -86,6 +94,18 @@
                 return;
             }
             console.assert(target != undefined);
+
+            // ドラッグ開始とドラッグ終了のマウス座標(screen)を取得し、移動距離が短い時はダウンロードしない。
+            let distance = Math.sqrt( (this.screenX-e.screenX)**2 + (this.screenY-e.screenY)**2 );
+            if (distance < 20) {
+                let drag = new Map();
+                drag.set('dragstart', {'screenX':this.screenX, 'screenY':this.screenY});
+                drag.set('dragend', {'screenX':e.screenX, 'screenY':e.screenY});
+                drag.set('distance', distance);
+                Log.d('net', drag);
+                return;
+            }
+
             const linkMap = new Map(); // <url, filename>
             // ダウンロード1回目
             this.parseLink(target, linkMap);
@@ -122,11 +142,12 @@
             }
         }
     }
-    chrome.storage.local.get('Log_LEVEL', (items) => {
-        const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+    //chrome.storage.local.get('Log_LEVEL', (items) => {
+    //    const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
         //string->int変換
-        Log.setLevel(+log_level);
+        //Log.setLevel(+log_level);
+        Log.setLevel(Log.LEVEL.OFF);
         gestures = new MouseGestures();
         gestures.pageLoad();
-    });
+    //});
 })();

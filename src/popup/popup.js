@@ -80,14 +80,15 @@ class Popup {
 document.addEventListener('DOMContentLoaded', (event) => {
     const popup = new Popup();
     let clipboard = undefined;
-    chrome.storage.local.get('Log_LEVEL', (items) => {
-        const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+   // chrome.storage.local.get('Log_LEVEL', (items) => {
+        //const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
         //string->int変換
-        Log.setLevel(+log_level);
+        //Log.setLevel(+log_level);
+        Log.setLevel(Log.LEVEL.OFF);
         popup.generate();
         clipboard = new Clipboard('#copy_button');
         clipboard.on('success', (e) => {
             e.clearSelection();
         });
-    });
+    //});
 });
