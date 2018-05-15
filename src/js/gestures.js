@@ -122,6 +122,10 @@
             //var ed = window.performance.now() - st;
             //console.log(ed);
         }
+        /**
+         * @param {object} target
+         * @param {Map<string, string>} linkMap
+        */
         parseLink(target, linkMap) {
             const src_attr = target.src || target.href;
             if (src_attr === undefined) {
@@ -130,6 +134,9 @@
             const link = new DownloadLink(src_attr);
             linkMap.set(link.href, link.download);
         }
+        /**
+         * @param {Map<string, string>} linkMap
+        */
         onDownload(linkMap) {
             for (const [key, value] of linkMap) {
                 const param = new BPRequest('GET');
@@ -147,7 +154,7 @@
         }
     }
     (async() => {
-        const log_level = await Configure.get('Log_LEVEL') || Log.LEVEL.OFF;
+        const log_level = await Configure.get("Log_LEVEL") || Log.LEVEL.OFF;
         //string->int変換
         Log.setLevel(+log_level);
         //Log.setLevel(Log.LEVEL.OFF);
