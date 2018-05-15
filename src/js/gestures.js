@@ -22,6 +22,9 @@
             }
             Object.seal(this);
         }
+        /**
+         * @param {string} filename
+        */
         parse_domain_Twitter(filename) {
             // ドメインがTwitterならorig画像を探してダウンロード。
             //@param {string}filename URLのfilename部分
@@ -42,6 +45,7 @@
             return this.src_attr === undefined;
         }
     }
+
     class MouseGestures {
         constructor() {
             this.func = {};
@@ -142,12 +146,12 @@
             }
         }
     }
-    //chrome.storage.local.get('Log_LEVEL', (items) => {
-    //    const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+    (async() => {
+        const log_level = await Configure.get('Log_LEVEL') || Log.LEVEL.OFF;
         //string->int変換
-        //Log.setLevel(+log_level);
-        Log.setLevel(Log.LEVEL.OFF);
+        Log.setLevel(+log_level);
+        //Log.setLevel(Log.LEVEL.OFF);
         gestures = new MouseGestures();
         gestures.pageLoad();
-    //});
+    })();
 })();
