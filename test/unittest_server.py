@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from os import chdir
-import glob
+from glob import glob
 from argparse import ArgumentParser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -29,7 +29,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             return
 
         body = f"time:{escape(self.date_time_string())}"
-        for item in map(escape, glob.glob('**/*.html', recursive=True)):
+        for item in map(escape, glob('**/*.html', recursive=True)):
             body += f"<li><a href='{item}' target='_top' rel='noopener'>{item}</a></li>"
 
         self.send_response(200)
