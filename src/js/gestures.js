@@ -5,7 +5,11 @@
     // 
     let Setting = undefined;
     let gestures = undefined;
+    let browser = chrome;
     class DownloadLink {
+        /**
+         * @param {string} src_attr
+        */
         constructor(src_attr) {
             this.src_attr = src_attr;
             console.assert(!this.validated, arguments);
@@ -69,21 +73,20 @@
             window.addEventListener('dragend', e => { this.ondragend(e); }, false); 
         }
         pageLoad() {
-            // 設定ファイル情報を取得
-            const param = new BPRequest('GET');
-            param.href = chrome.extension.getURL('resources/setting.json');
-            param.sendMessage((response) => {
-                let data = response;
-                if(data === undefined) {
+            (async() => {
+                //◆ref
+                // Fetch API
+                // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
+                // async => awaitの即時関数
+                // 設定ファイルより
+                const response = await fetch(browser.extension.getURL("resources/setting.json"));
+                if(!response.ok){
+                    Log.e(this.pageLoad.name, response);
                     return;
                 }
-                if(data.status === STATUS.NG) {
-                    Log.e('net', data);
-                }else {
-                    Log.d('net', data); 
-                }
-                Setting = data.payload;
-            });
+                Setting = await response.json();
+            })();
+            return this;
         }
         ondragstart(e) {
             this.screenX = e.screenX;
@@ -158,7 +161,6 @@
         //string->int変換
         Log.setLevel(+log_level);
         //Log.setLevel(Log.LEVEL.OFF);
-        gestures = new MouseGestures();
-        gestures.pageLoad();
+        gestures = new MouseGestures().pageLoad();
     })();
 })();
