@@ -1,41 +1,63 @@
-# -*- coding: utf-8 -*-
-import os
+# -*- coding: utf8 -*-
+from os import chdir
 import glob
-from datetime import datetime
-import argparse
-from tornado.web import Application, StaticFileHandler, RequestHandler
-from tornado.ioloop import IOLoop
+from argparse import ArgumentParser
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socketserver import ThreadingMixIn
+from ipaddress import ip_address
+from pathlib import Path
+from html import escape
 
-base_dir = os.path.dirname(__file__)
-
-
-class MainHandler(RequestHandler):
-    def get(self):
-        creation_date = datetime.now().strftime('%Y/%m/%d %X')
-        items = []
-        for name in glob.iglob(os.path.join(base_dir, '*.html')):
-            items.append(os.path.basename(name))
-        self.render("index.html", title=self.request.uri, creation_date=creation_date, items=items)
+BASE_DIR = Path(__file__).parent
 
 
-class NoCacheStaticFileHandler(StaticFileHandler):
+class MyHandler(SimpleHTTPRequestHandler):
+    """
+        MyHandler
+    """
+    def do_GET(self):
+        req_ip = ip_address(self.client_address[0])
+        # IPアドレスによる簡易的なアクセス制限
+        # ループバック,ローカルアドレス以外はステータスコード:403を返す
+        is_accepted = any([req_ip.is_loopback, req_ip.is_private])
+        if not is_accepted:
+            self.send_response(403)
+            self.end_headers()
+            return
+        if self.path != "/":
+            super().do_GET()
+            return
 
-    def get_cache_time(self,path,modified,mime_type):
-        return 0
+        body = f"time:{escape(self.date_time_string())}"
+        for item in map(escape, glob.glob('**/*.html', recursive=True)):
+            body += f"<li><a href='{item}' target='_top' rel='noopener'>{item}</a></li>"
+
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(f"<html><head></head><body>{body}</body></html>".encode('utf-8'))
+        self.wfile.write(b'\n')
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--port', '-p', type=int, default=8888, help='Port number')
+
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    """
+        ThreadingHTTPServer
+    """
+    daemon_threads = True
+
+
+def main() ->None:
+    """
+        main
+    """
+    parser = ArgumentParser()
+    parser.add_argument('--port', '-p', type=int, default=8000, help='Port number')
     args = parser.parse_args()
-    httpd = Application([
-        (r"/", MainHandler),
-        (r"/(.*)", StaticFileHandler, {'path': './', 'default_filename': 'index.html'})],
-        template_path=os.path.join(base_dir, 'templates'),
-    )
-    httpd.listen(args.port)
-    print('unittest serving at', ':', args.port)
-    IOLoop.instance().start()
+    # SimpleHTTPRequestHandlerが現在のディレクトリを元にマッピングするため、作業ディレクトリを変更する。
+    chdir(BASE_DIR)
+    with ThreadingHTTPServer(("", args.port), MyHandler) as httpd:
+        print("serving at port:", args.port)
+        httpd.serve_forever()
 
 
 if __name__ == '__main__':
