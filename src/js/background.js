@@ -14,9 +14,11 @@
                 return true;
             });
         }
+        /**
+         * @param {string} url          ダウンロード対象URL
+         * @param {string} filename     保存ファイル名
+        */
         onDownloadFile(url, filename) {
-            //@param url       ダウンロード対象URL
-            //@param filename  保存ファイル名
             return new Promise((resolve, reject) => {
                 const param = { url: url, filename: filename};
                 Log.v('download', param);
@@ -30,6 +32,11 @@
             });
         }
         //@public
+        /**
+         * @param {any} request
+         * @param {MessageSender} sender
+         * @param {function} sendResponse
+        */
         get(request, sender, sendResponse) {
             const href = request.href;
             if(href.startsWith('chrome-extension://')) {
@@ -93,14 +100,11 @@
     //chrome.runtime.onInstalled.addListener(details => {
         //console.log('previousVersion', details.previousVersion);
         let background = undefined;
-        // async function
-        //chrome.storage.local.get('Log_LEVEL', (items) => {
-        //    const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+        (async() => {
+            const log_level = await Configure.get("Log_LEVEL") || Log.LEVEL.OFF;
             //string->int変換
-            //Log.setLevel(+log_level);
-            Log.setLevel(Log.LEVEL.OFF);
+            Log.setLevel(+log_level);
+            //Log.setLevel(Log.LEVEL.OFF);
             background = new Background();
-        //});
-        
-    //});
+        })();
 })();
