@@ -1,13 +1,5 @@
 //@popup.js
 'use strict';
-class Config {
-    constructor() {
-        this.version = 1;
-    }
-    toData(){
-        return {version:this.version};
-    }
-}
 class Popup {
     constructor() {
         this.Manifest = chrome.runtime.getManifest();
@@ -18,7 +10,7 @@ class Popup {
         // 検索範囲：body要素以下
         // 検索値：data-i18n-contentが属性に存在すること。
         // 処理：上記属性が存在時に_locales/(ロケール名)/message.json よりメッセージを取得しtextContentに設定
-        for (const elementList of document.querySelectorAll('body *')) {
+        for (const elementList of document.body.querySelectorAll('*')) {
             const i18n_content = 'data-i18n-content';
             if(!elementList.hasAttribute(i18n_content)) {
                 continue;
@@ -54,9 +46,10 @@ class Popup {
                 }
                 radio.addEventListener('click', (e) => {
                     const value = e.target.value;
-                    chrome.storage.local.set({'Log_LEVEL': value}, (items) => {
+                    (async() => {
+                        await Configure.set({"Log_LEVEL": value});
                         console.log(`${new Date().toISOString()} setLogLevel:${value}`);
-                    });
+                    })();
                 }, false);
                 loglevel_list.appendChild(radio);
                 
@@ -80,15 +73,14 @@ class Popup {
 document.addEventListener('DOMContentLoaded', (event) => {
     const popup = new Popup();
     let clipboard = undefined;
-   // chrome.storage.local.get('Log_LEVEL', (items) => {
-        //const log_level = items.Log_LEVEL || Log.LEVEL.OFF;
+    (async() => {
+        const log_level = await Configure.get("Log_LEVEL") || Log.LEVEL.OFF;
         //string->int変換
-        //Log.setLevel(+log_level);
-        Log.setLevel(Log.LEVEL.OFF);
+        Log.setLevel(+log_level);
         popup.generate();
         clipboard = new Clipboard('#copy_button');
         clipboard.on('success', (e) => {
             e.clearSelection();
         });
-    //});
+    })();
 });
