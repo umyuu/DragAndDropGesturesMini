@@ -4,37 +4,50 @@
         NG: 400,
     });
     class Message {
-        // Message クラス
-        // 概要：content scriptとbackground script 間のデータ受け渡しに使用。
-        // ◆ref
-        // https://developer.chrome.com/extensions/messaging
+        /**
+         * Message クラス
+         * 概要：content scriptとbackground script 間のデータ受け渡しに使用。
+         * @see https://developer.chrome.com/extensions/messaging
+         * @param {string} type メッセージ特定を特定するための文字列
+        */
         constructor(type) {
-            //@param {string}type メッセージ特定を特定するための文字列
             this.type = type;
-            // mask
-            //    0:background script → content script
-            //    1:content script → background script
-            //    
+            /**
+             * @example
+             *  0:background script → content script
+             *  1:content script → background script
+             */
             this.mask = 1; 
             // メッセージ送信日時(デバック用)
             this.date = new Date().toISOString();
         }
+        /**
+         * @param {function} callback
+        */
         sendAction(callback) {
             console.assert(callback != undefined, arguments);
             Log.v('net', this);
             callback(this);
         }
-        
+        /**
+         * @param {function} callback
+        */
         sendAsnc(callback) {
-            return new Promise(function(resolve, reject){
+            return new Promise((resolve, reject) => {
                 callback(resolve);
             });
         }
     }
     class BPRequest extends Message {
+        /**
+         * @param {string} type
+        */
         constructor(type) {
             super(type);
         }
+        /**
+         * @param {function} callback
+        */
         sendMessage(callback) {
             console.assert(callback != undefined, arguments);
             Log.d('net', this);
@@ -42,11 +55,17 @@
         }
     }
     class BPResponse extends Message {
+        /**
+         * @param {string} type
+        */
         constructor(type) {
             super(type);
         }
     }
     class CSMessageBase extends Message {
+        /**
+         * @param {string} type
+        */
         constructor(type) {
             super(type);
             this.mask = 0;
@@ -54,6 +73,10 @@
     }
 
     class CSRequest extends CSMessageBase {
+        /**
+         * @param {string} type
+         * @param {STATUS} status
+        */
         constructor(type, status = STATUS.OK) {
             //@param {enum}status ステータスコード
             super(type);
@@ -70,6 +93,10 @@
         }
     }
     class CSResponse extends CSMessageBase {
+        /**
+         * @param {string} type
+         * @param {STATUS} status
+        */
         constructor(type, status = STATUS.OK) {
             super(type);
             this.status = status;

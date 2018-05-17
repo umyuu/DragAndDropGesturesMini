@@ -22,6 +22,9 @@
             return new Promise((resolve, reject) => {
                 const param = { url: url, filename: filename};
                 Log.v('download', param);
+                /**
+                 * @see https://developer.chrome.com/extensions/downloads#method-download
+                 */
                 chrome.downloads.download(param, (e) => {
                     try{
                         resolve(e); 
@@ -45,10 +48,12 @@
             //    let downloadId = await chrome.downloads.download(param);
             ///    Log.v('download', downloadId);
             //})();
+
             this.onDownloadFile(href, request.filename).then(res => {
-                //@param res     undefined ダウンロード失敗時
-                //◆ref
-                // https://developer.chrome.com/extensions/downloads#method-download
+                /**
+                 * @param res     undefined ダウンロード失敗時
+                 * @see https://developer.chrome.com/extensions/downloads#method-download
+                */
                 let message = new CSRequest('onDownload');
                 message.dst = sender.tab.id;
                 message.payload = res;

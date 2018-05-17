@@ -27,15 +27,14 @@
             Object.seal(this);
         }
         /**
-         * @param {string} filename
+         * ドメインがTwitterならorig画像を探してダウンロード。
+         * @param {string} filename URLのfilename部分
+         * @example
+         * | exsample.jpg        => exsample.jpg:orig
+         * | exsample.jpg:orig   => exsample.jpg:orig
+         * | exsample.jpg:small  => exsample.jpg:orig
         */
         parse_domain_Twitter(filename) {
-            // ドメインがTwitterならorig画像を探してダウンロード。
-            //@param {string}filename URLのfilename部分
-            // | exsample.jpg        => exsample.jpg:orig
-            // | exsample.jpg:orig   => exsample.jpg:orig
-            // | exsample.jpg:small  => exsample.jpg:orig
-            
             // :small部分を削除(pop)して、:origを追加
             let scale_array = filename.split(':');
             if(scale_array.length >= 2) {
@@ -52,21 +51,21 @@
 
     class MouseGestures {
         constructor() {
-            this.func = {};
+            this.func = new Map();
             this.screenX = 0;
             this.screenY = 0;
             this.assignEventHandler();
             //Object.seal(this);
         }
         assignEventHandler(){
-            this.func['onDownload'] = (request, sender, sendResponse) => {
+            this.func.set('onDownload',(request, sender, sendResponse) => {
                 Log.d('net', request);
                 const param = new BPResponse(request.type);
                 param.sendAction(sendResponse);
-            };
+            });
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                this.func[request.type](request, sender, sendResponse);
+                this.func.get(request.type)(request, sender, sendresponse);
                 return true;
             });
             window.addEventListener('dragstart', e => { this.ondragstart(e); }, false); 
@@ -74,11 +73,12 @@
         }
         pageLoad() {
             (async() => {
-                //◆ref
-                // Fetch API
-                // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
-                // async => awaitの即時関数
-                // 設定ファイルより
+                /**
+                 * async => awaitの即時関数
+                 * Fetch API
+                 * @see https://developer.mozilla.org/ja/docs/Web/API/Fetch_API
+                 * 設定ファイルより
+                 */
                 const response = await fetch(browser.extension.getURL("resources/setting.json"));
                 if(!response.ok){
                     Log.e(this.pageLoad.name, response);
@@ -97,6 +97,7 @@
             //EntryPoint
             //var st = window.performance.now();
             const target = e.target;
+            // 設定ファイルが読み込めなかったら
             if(Setting === undefined) {
                 return;
             }
@@ -112,8 +113,11 @@
                 Log.d('net', drag);
                 return;
             }
-
-            const linkMap = new Map(); // <url, filename>
+            /**
+             * @example
+             * <url, filename>
+             */
+            const linkMap = new Map();
             // ダウンロード1回目
             this.parseLink(target, linkMap);
             // IMGタグがAタグで囲まれていたら、Aタグ側もダウンロード
