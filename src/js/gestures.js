@@ -58,14 +58,14 @@
             //Object.seal(this);
         }
         assignEventHandler(){
-            this.func.set('onDownload',(request, sender, sendResponse) => {
+            this.func.set('onDownload', (request, sender, sendResponse) => {
                 Log.d('net', request);
                 const param = new BPResponse(request.type);
                 param.sendAction(sendResponse);
             });
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-                this.func.get(request.type)(request, sender, sendresponse);
+                this.func.get(request.type)(request, sender, sendResponse);
                 return true;
             });
             window.addEventListener('dragstart', e => { this.ondragstart(e); }, false); 
@@ -105,12 +105,12 @@
 
             // ドラッグ開始とドラッグ終了のマウス座標(screen)を取得し、移動距離が短い時はダウンロードしない。
             let distance = Math.sqrt( (this.screenX-e.screenX)**2 + (this.screenY-e.screenY)**2 );
-            if (distance < 20) {
+            if (distance < Setting.distance) {
                 let drag = new Map();
                 drag.set('dragstart', {'screenX':this.screenX, 'screenY':this.screenY});
                 drag.set('dragend', {'screenX':e.screenX, 'screenY':e.screenY});
                 drag.set('distance', distance);
-                Log.d('net', drag);
+                Log.d(this.ondragend.name, drag);
                 return;
             }
             /**
