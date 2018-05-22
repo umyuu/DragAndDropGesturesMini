@@ -34,6 +34,7 @@
         */
         sendAsnc(callback) {
             return new Promise((resolve, reject) => {
+                Log.v('net', this);
                 callback(resolve);
             });
         }
