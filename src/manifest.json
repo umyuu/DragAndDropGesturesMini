@@ -16,12 +16,13 @@
 	],
     "background": {
         "page": "background.html",
-        "persistent": true
+        "persistent": false
     },
 	"content_scripts": [{
 		"matches": [ "http://*/*", "https://*/*" ],
 		"js": [
             "js/log.js",
+            "js/configure.js",
             "js/message.js",
             "js/gestures.js"
         ],
@@ -31,5 +32,5 @@
     "web_accessible_resources":[
         "resources/setting.json"
     ],
-	"version": "1.0.6"
+	"version": "1.0.7"
 }

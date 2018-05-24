@@ -3,5 +3,6 @@
     "twitter": {
         "domain" : "https://pbs.twimg.com/media/",
         "orig" : ":orig"
-    }
+    },
+    "distance": 20
 }

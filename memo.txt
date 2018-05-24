@@ -2,6 +2,7 @@
 □Directory Deploy
 ------------------------------------------------------------
 ./
+├ doc/            … document Directory.
 ├ src/            … chrome extension program source Directory.
 │  ├ 3rdparty/    … External Libraries.
 │  ├ images/      … image Directory.

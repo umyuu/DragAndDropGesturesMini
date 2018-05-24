@@ -1,7 +1,8 @@
 {
 	"version": "1",
     "twitter": {
-        "domain" : "https://pbs.twimg.com/media/",
-        "orig" : ":orig"
-    }
+        "domain": ["https://pbs.twimg.com/media/", "https://ton.twitter.com/i/"],
+        "orig" : [":orig", ":large"]
+    },
+    "distance": 20
 }

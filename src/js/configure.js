@@ -1,12 +1,22 @@
 ﻿
 	'use strict';
     class Configure {
-        constructor() {
-            this.KEY = Object.freeze({
-                "Log_LEVEL": "Log_LEVEL",
+        /**
+         * @param {object} key
+        */
+        static get(key = null) {
+            return new Promise((resolve) => {
+                chrome.storage.local.get(key, (item) => {
+                    key ? resolve(item[key]) : resolve(item);
+                });
             });
         }
-        get(key, callback) {
-            chrome.storage.local.get(key, callback);
+        /**
+         * @param {object} items
+        */
+       static set(items) {
+            return new Promise((resolve) => {
+                chrome.storage.local.set(items, () => resolve());
+            });
         }
     }
