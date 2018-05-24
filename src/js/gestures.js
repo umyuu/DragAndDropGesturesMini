@@ -16,9 +16,12 @@
             // basepathのみ
             this.basepath_array = src_attr.split('/');
             const filename = this.basepath_array.pop();
-            let isTwitter = src_attr.startsWith(Setting.twitter.domain);
-            if(isTwitter) {
-                this.parse_domain_Twitter(filename);
+            // 
+            let hasIndex = Array.from(Setting.twitter.domain).findIndex((element) => {
+                return src_attr.startsWith(element);
+            });
+            if(hasIndex !== -1) {
+                this.parse_domain_Twitter(hasIndex, filename);
             }else {
                 this.href = src_attr;
                 // filename
@@ -28,20 +31,24 @@
         }
         /**
          * ドメインがTwitterならorig画像を探してダウンロード。
+         * DMの場合はorig画像が無いので、large画像になる。
+         * @param {number} hasIndex index
          * @param {string} filename URLのfilename部分
          * @example
          * | exsample.jpg        => exsample.jpg:orig
          * | exsample.jpg:orig   => exsample.jpg:orig
          * | exsample.jpg:small  => exsample.jpg:orig
         */
-        parse_domain_Twitter(filename) {
+        parse_domain_Twitter(hasIndex, filename) {
+            console.assert(hasIndex !== -1, arguments);
             // :small部分を削除(pop)して、:origを追加
             let scale_array = filename.split(':');
             if(scale_array.length >= 2) {
                 scale_array.pop();
             }
+
             this.href = this.basepath_array.concat(
-                scale_array.toString() + Setting.twitter.orig).join('/');
+                scale_array.toString() + Setting.twitter.orig[hasIndex]).join('/');
             this.download = scale_array.toString();
         }
         get validated() {
