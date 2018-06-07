@@ -21,7 +21,7 @@
         onDownloadFile(url, filename) {
             return new Promise((resolve, reject) => {
                 const param = { url: url, filename: filename};
-                Log.v('download', param);
+                Log.v(this.onDownloadFile.name, param);
                 /**
                  * @see https://developer.chrome.com/extensions/downloads#method-download
                  */
@@ -36,7 +36,7 @@
         }
         //@public
         /**
-         * @param {any} request
+         * @param {BPRequest} request
          * @param {MessageSender} sender
          * @param {function} sendResponse
         */
@@ -44,18 +44,17 @@
             const href = request.href;
             const csResponse = new CSResponse(request.type);
             csResponse.request = request;
-            csResponse.sendAction(sendResponse);
+            MessageQueue.sendAction(csResponse, sendResponse);
             let message = new CSRequest('onDownload');
             message.dst = sender.tab.id;
             try{
                 /**
-                 * @param res     undefined ダウンロード失敗時
+                 * @param payload     undefined ダウンロード失敗時
                  * @see https://developer.chrome.com/extensions/downloads#method-download
                 */
-                let res = await this.onDownloadFile(href, request.filename);
-                message.payload = res;
+                message.payload = await this.onDownloadFile(href, request.filename);
                 message.request = request;
-                if(res === undefined) {
+                if(message.payload === undefined) {
                     message.status = STATUS.NG;
                     message.err = chrome.runtime.lastError;
                 }
@@ -64,7 +63,7 @@
                 message.status = STATUS.NG;
                 message.err = chrome.runtime.lastError;
             }
-            message.sendMessage();
+            await MessageQueue.sendMessage(message, () => {});
         }
     }
     

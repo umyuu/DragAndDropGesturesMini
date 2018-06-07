@@ -68,7 +68,7 @@
             this.func.set('onDownload', (request, sender, sendResponse) => {
                 Log.d('net', request);
                 const param = new BPResponse(request.type);
-                param.sendAction(sendResponse);
+                MessageQueue.sendAction(param, sendResponse);
             });
             // background script => contents script callback.
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -131,7 +131,6 @@
             if(target.parentElement.tagName.toUpperCase() === 'A'){
                 this.parseLink(target.parentElement, linkMap);
             }
-            
             this.onDownload(linkMap);
             //var ed = window.performance.now() - st;
             //console.log(ed);
@@ -153,17 +152,19 @@
         */
         onDownload(linkMap) {
             for (const [key, value] of linkMap) {
-                const param = new BPRequest('GET');
-                param.href = key;
-                param.filename = value;
-                try{
-                    param.sendMessage((response) => {
-                        let data = response;
-                        Log.d('net', data);
-                    });
-                } catch (err) {
-                    Log.e('net', err);
-                }
+                (async() => {
+                    const param = new BPRequest('GET');
+                    param.href = key;
+                    param.filename = value;
+                    try{
+                        await MessageQueue.sendMessage(param, (response) => {
+                            let data = response;
+                            Log.d('net', data);
+                        });
+                    } catch (err) {
+                        Log.e('net', err);
+                    }
+                })();
             }
         }
     }
