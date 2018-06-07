@@ -5,6 +5,7 @@
 from os import chdir
 from glob import glob
 from argparse import ArgumentParser
+from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from ipaddress import ip_address
@@ -24,7 +25,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         # ループバック,ローカルアドレス以外はステータスコード:403を返す
         is_accepted = any([req_ip.is_loopback, req_ip.is_private])
         if not is_accepted:
-            self.send_response(403)
+            self.send_response(HTTPStatus.FORBIDDEN)
             self.end_headers()
             return
         if self.path != "/":
@@ -35,7 +36,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         for item in map(escape, glob('**/*.html', recursive=True)):
             body += f"<li><a href='{item}' target='_top' rel='noopener'>{item}</a></li>"
 
-        self.send_response(200)
+        self.send_response(HTTPStatus.OK)
         self.end_headers()
         self.wfile.write(f"<html><head></head><body>{body}</body></html>".encode('utf-8'))
         self.wfile.write(b'\n')
@@ -60,6 +61,7 @@ def main() ->None:
     chdir(BASE_DIR)
     with ThreadingHTTPServer(("", args.port), MyHandler) as httpd:
         print("serving at port:", args.port)
+        print(f"http://127.0.0.1:{args.port}/")
         httpd.serve_forever()
 
 
