@@ -2,6 +2,7 @@
     unittest server
 """
 # -*- coding: utf8 -*-
+from functools import wraps
 from os import chdir
 from glob import glob
 from argparse import ArgumentParser
@@ -13,6 +14,27 @@ from pathlib import Path
 from html import escape
 
 BASE_DIR = Path(__file__).parent
+
+
+def html_tag(tag: str, attr: str = "", sub_element: str = ""):
+    def _html_tag(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            """
+                tag:html
+                <html></html>
+            """
+            content = f'<{tag}'
+            if attr != "":
+                content += f' {attr}'
+            content += '>\n'
+            if sub_element != "":
+                content += f'{sub_element}\n'
+
+            content += f'{func(*args, **kwargs)}</{tag}>\n'
+            return content
+        return wrapper
+    return _html_tag
 
 
 class MyHandler(SimpleHTTPRequestHandler):
@@ -29,17 +51,26 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if self.path != "/":
+            # ルートパス以外は要求コンテンツをレスポンスとして返す
             super().do_GET()
             return
 
-        body = f"time:{escape(self.date_time_string())}"
-        for item in map(escape, glob('**/*.html', recursive=True)):
-            body += f"<li><a href='{item}' target='_top' rel='noopener'>{item}</a></li>"
-
         self.send_response(HTTPStatus.OK)
         self.end_headers()
-        self.wfile.write(f"<html><head></head><body>{body}</body></html>".encode('utf-8'))
-        self.wfile.write(b'\n')
+        @html_tag('html', sub_element='<head><meta charset="utf-8" /></head>')
+        @html_tag('body')
+        @html_tag('main', 'role="main"')
+        def html_body():
+            """
+                html
+            """
+            body = ""
+            for item in map(escape, glob('**/*.html', recursive=True)):
+                body += f'<li><a href="{item}" target="_top" rel="noopener">{item}</a></li>'
+            body += f"\n<hr><span>{escape(self.date_time_string())}</span>\n"
+            return body
+
+        self.wfile.write(f"<!DOCTYPE html>\n{html_body()}".encode('utf-8'))
 
 
 
