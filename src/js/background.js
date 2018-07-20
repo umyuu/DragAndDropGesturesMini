@@ -1,5 +1,4 @@
-﻿(function()
-{
+﻿{
 	'use strict';
     class Background {
         constructor() {
@@ -75,4 +74,4 @@
         //Log.setLevel(Log.LEVEL.OFF);
         background = new Background();
     })();
-})();
+}

@@ -1,5 +1,4 @@
 ﻿//@gestures.js
-(function()
 {
 	'use strict';
     // 
@@ -175,4 +174,4 @@
         //Log.setLevel(Log.LEVEL.OFF);
         gestures = new MouseGestures().pageLoad();
     })();
-})();
+}
