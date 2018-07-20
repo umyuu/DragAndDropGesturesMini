@@ -17,6 +17,11 @@ BASE_DIR = Path(__file__).parent
 
 
 def html_tag(tag: str, attr: str = "", sub_element: str = ""):
+    """
+    :param tag:
+    :param attr:
+    :param sub_element:
+    """
     def _html_tag(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -42,14 +47,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         MyHandler
     """
     def do_GET(self):
-        req_ip = ip_address(self.client_address[0])
-        # IPアドレスによる簡易的なアクセス制限
-        # ループバック,ローカルアドレス以外はステータスコード:403を返す
-        is_accepted = any([req_ip.is_loopback, req_ip.is_private])
-        if not is_accepted:
-            self.send_response(HTTPStatus.FORBIDDEN)
-            self.end_headers()
-            return
         if self.path != "/":
             # ルートパス以外は要求コンテンツをレスポンスとして返す
             super().do_GET()
@@ -73,17 +70,27 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.wfile.write(f"<!DOCTYPE html>\n{html_body()}".encode('utf-8'))
 
 
-
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """
         ThreadingHTTPServer
     """
     daemon_threads = True
 
+    def verify_request(self, request, client_address):
+        """
+        IPアドレスによる簡易的なアクセス制限
+        ループバック,ローカルアドレス以外は接続拒否
+        :param request:
+        :param client_address:
+        :return:
+        """
+        req_ip = ip_address(client_address[0])
+        return any([req_ip.is_loopback, req_ip.is_private])
+
 
 def main() ->None:
     """
-        main
+        EntryPoint
     """
     parser = ArgumentParser()
     parser.add_argument('--port', '-p', type=int, default=8000, help='Port number')
