@@ -1,45 +1,46 @@
+# -*- coding: utf8 -*-
 """
     unittest server
 """
-# -*- coding: utf8 -*-
-from functools import wraps
-from os import chdir
 from glob import glob
-from argparse import ArgumentParser
+from html import escape
 from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from socketserver import ThreadingMixIn
 from ipaddress import ip_address
+from os import chdir
 from pathlib import Path
-from html import escape
+from socketserver import ThreadingMixIn
+from string import Template
+
 
 BASE_DIR = Path(__file__).parent
 
 
-def html_tag(tag: str, attr: str = "", sub_element: str = ""):
+def index_html():
     """
-    :param tag:
-    :param attr:
-    :param sub_element:
-    """
-    def _html_tag(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            """
-                tag:html
-                <html></html>
-            """
-            content = f'<{tag}'
-            if attr != "":
-                content += f' {attr}'
-            content += '>\n'
-            if sub_element != "":
-                content += f'{sub_element}\n'
 
-            content += f'{func(*args, **kwargs)}</{tag}>\n'
-            return content
-        return wrapper
-    return _html_tag
+    :return:
+    """
+    html = """<!DOCTYPE html>\n<html>\n<head>
+    <meta charset="utf-8" />\n    <title>Unittest Server</title>
+</head>
+<body>
+<main role="main">
+$body
+    <footer><hr><span>$creation_time</span></footer>
+</main>
+</body>\n</html>"""
+    return Template(html)
+
+
+def html_body():
+    """
+        html body
+    """
+    body = ""
+    for item in map(escape, glob('**/*.html', recursive=True)):
+        body += f'    <li><a href="{item}" target="_top" rel="noopener">{item}</a></li>\n'
+    return body
 
 
 class MyHandler(SimpleHTTPRequestHandler):
@@ -47,27 +48,20 @@ class MyHandler(SimpleHTTPRequestHandler):
         MyHandler
     """
     def do_GET(self):
+        """
+
+        :return:
+        """
         if self.path != "/":
             # ルートパス以外は要求コンテンツをレスポンスとして返す
             super().do_GET()
             return
-
         self.send_response(HTTPStatus.OK)
         self.end_headers()
-        @html_tag('html', sub_element='<head><meta charset="utf-8" /></head>')
-        @html_tag('body')
-        @html_tag('main', 'role="main"')
-        def html_body():
-            """
-                html
-            """
-            body = ""
-            for item in map(escape, glob('**/*.html', recursive=True)):
-                body += f'<li><a href="{item}" target="_top" rel="noopener">{item}</a></li>'
-            body += f"\n<hr><span>{escape(self.date_time_string())}</span>\n"
-            return body
 
-        self.wfile.write(f"<!DOCTYPE html>\n{html_body()}".encode('utf-8'))
+        s = index_html().substitute({"body": html_body(),
+                                     "creation_time": escape(self.date_time_string())})
+        self.wfile.write(s.encode('utf-8'))
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -88,13 +82,22 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
         return any([req_ip.is_loopback, req_ip.is_private])
 
 
+def parse_args():
+    """
+
+    :return:
+    """
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('--port', '-p', type=int, default=8000, help='Port number')
+    return parser.parse_args()
+
+
 def main() ->None:
     """
         EntryPoint
     """
-    parser = ArgumentParser()
-    parser.add_argument('--port', '-p', type=int, default=8000, help='Port number')
-    args = parser.parse_args()
+    args = parse_args()
     # SimpleHTTPRequestHandlerが現在のディレクトリを元にマッピングするため、作業ディレクトリを変更する。
     chdir(BASE_DIR)
     with ThreadingHTTPServer(("", args.port), MyHandler) as httpd:
